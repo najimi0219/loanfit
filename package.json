@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "seed": "tsx src/db/seed.ts",
-    "fields:gen": "tsx scripts/excel-to-json.ts",
-    "banks:import": "tsx scripts/import-banks-from-excel.ts"
+    "scripts": {
+      "dev": "next dev --turbopack",
+      "build": "next build",
+      "start": "next start",
+      "lint": "next lint --fix",
+      "db:push": "drizzle-kit push",
+      "db:studio": "drizzle-kit studio",
+      "seed": "tsx src/db/seed.ts",
+      "fields:gen": "tsx scripts/excel-to-json.ts",
+      "banks:import": "tsx scripts/import-banks-from-excel.ts"
+    }
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
