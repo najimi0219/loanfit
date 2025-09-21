@@ -1,0 +1,28 @@
+[
+  {
+  "id": "物件種別",
+  "label": "物件種別",
+  "type": "select",
+  "options": [
+    "土地",
+    "新築戸建",
+    "中古戸建",
+    "マンション"
+  ],
+  "meta_method": "土地/新築戸建/中古戸建/マンション"
+},
+{
+  "id": "土地面積",
+  "label": "土地面積（㎡）",
+  "type": "number",
+  "options": null,
+  "meta_method": "ナンバー"
+},
+{
+  "id": "建物面積",
+  "label": "建物面積（㎡）",
+  "type": "number",
+  "options": null,
+  "meta_method": "ナンバー"
+}
+]
