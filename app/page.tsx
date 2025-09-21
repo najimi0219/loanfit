@@ -851,7 +851,8 @@ export default function Home() {
   const [selectedLoan, setSelectedLoan] = useState<HousingLoan | null>(null);
   const [clearTrigger, setClearTrigger] = useState(0); // 追加
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
  
   // 全ての住宅ローンデータを取得
   useEffect(() => {
@@ -875,6 +876,49 @@ export default function Home() {
     fetchLoans();
   }, []);
 
+
+// 🔥 新規追加: スクロール監視用のuseEffect
+useEffect(() => {
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+    
+    // PC（lg以上）では常に表示
+    if (window.innerWidth >= 1024) {
+      setIsHeaderVisible(true);
+      return;
+    }
+    
+    // モバイルでのみ自動非表示機能を有効化
+    if (currentScrollY < 10) {
+      setIsHeaderVisible(true);
+    }
+    else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      setIsHeaderVisible(false);
+    }
+    else if (currentScrollY < lastScrollY) {
+      setIsHeaderVisible(true);
+    }
+    
+    setLastScrollY(currentScrollY);
+  };
+
+  const handleResize = () => {
+    // 画面サイズ変更時にPC判定をリセット
+    if (window.innerWidth >= 1024) {
+      setIsHeaderVisible(true);
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', handleResize);
+  
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('resize', handleResize);
+  };
+}, [lastScrollY]);
+
+// フィルタリングされた住宅ローン一覧（借入可能額計算付き）
   // フィルタリングされた住宅ローン一覧（借入可能額計算付き）
   // page.tsx の型安全版（完全修正）
 
@@ -1201,8 +1245,10 @@ return filteredResult;
       <style>{GLOBAL_CSS}</style>
 
       {/* ヘッダー：LoanFit ロゴ + ナビゲーション */}
-      <header className="sticky top-0 z-20 backdrop-blur border-b border-white/30 dark:border-white/10">
-  <div className="mx-auto max-w-7xl px-4 py-3">
+      <header className={`fixed top-0 left-0 right-0 z-20 backdrop-blur border-b border-white/30 dark:border-white/10 transition-transform duration-300 ease-in-out ${
+  isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+}`}>
+    <div className="mx-auto max-w-7xl px-4 py-3">
     <div className="flex items-center justify-between mb-2">
       <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
         <span className="brand-text">LoanFit</span>
@@ -1240,7 +1286,7 @@ return filteredResult;
       </header>
 
       {/* メインコンテンツ：左フィルター / 右結果一覧 */}
-      <main className="mx-auto max-w-7xl px-4 py-6 grid gap-8 grid-cols-1 lg:grid-cols-4">
+      <main className="mx-auto max-w-7xl px-4 py-6 pt-32 grid gap-8 grid-cols-1 lg:grid-cols-4">
 
         {/* 左：検索条件（sticky） */}
         <aside className="lg:col-span-1">
