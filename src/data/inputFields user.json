@@ -1,0 +1,392 @@
+[
+ 
+
+  {
+    "id": "変動・固定",
+    "label": "変動・固定",
+    "type": "select",
+    "options": [
+      "変動",
+      "固定"
+    ],
+    "meta_method": "変動/固定"
+  },
+  {
+    "id": "借入名義",
+    "label": "借入名義",
+    "type": "select",
+    "options": [
+      "単独名義（所帯有）",
+      "単身者",
+      "ペアローン",
+      "収入合算(連帯債務)",
+      "収入合算(連帯保証)"
+    ],
+    "meta_method": "単独名義（所帯有）/単身者/ペアローン/収入合算(連帯債務)/収入合算(連帯保証)/婚姻前合算"
+  },
+  {
+    "id": "借入希望額_万円",
+    "label": "借入希望額（万円）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "借入希望額算出",
+    "label": "借入希望額算出",
+    "type": "button",
+    "options": null,
+    "meta_method": "ボタン"
+  },
+  {
+    "id": "物件価格_万円",
+    "label": "物件価格（万円）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "諸経費_万円",
+    "label": "諸経費（万円）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "総額表示",
+    "label": "総額表示",
+    "type": "text",
+    "options": null,
+    "meta_method": "nan"
+  },
+  {
+    "id": "自己資金額",
+    "label": "自己資金額",
+    "type": "number",
+    "options": null,
+    "meta_method": "nan"
+  },
+  {
+    "id": "年収_万円",
+    "label": "年収（万円）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "年齢",
+    "label": "年齢",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "借入希望年数",
+    "label": "借入希望年数",
+    "type": "number",
+    "options": null,
+    "meta_method": "nan"
+  },
+  {
+    "id": "雇用形態",
+    "label": "雇用形態",
+    "type": "select",
+    "options": [
+      "正社員",
+      "契約",
+      "派遣",
+      "パート"
+    ],
+    "meta_method": "正社員/契約/派遣/パート"
+  },
+  {
+    "id": "勤続",
+    "label": "勤続",
+    "type": "select",
+    "options": [
+      "１ヵ月",
+      "３ヵ月",
+      "半年",
+      "1年",
+      "2年",
+      "3年以上"
+    ],
+    "meta_method": "１ヵ月/３ヵ月/半年/1年/2年/3年以上"
+  },
+  {
+    "id": "代表",
+    "label": "代表",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "自営",
+    "label": "自営",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "産休育休",
+    "label": "産休育休",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "他借入の返済額_万円_月",
+    "label": "他借入の返済額（万円／月）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "持病の有無",
+    "label": "持病の有無",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "団信",
+    "label": "団信",
+    "type": "select",
+    "options": [
+      "一般団信",
+      "がん100",
+      "3大疾病",
+      "無団信",
+      "ワイド団信"
+    ],
+    "meta_method": "一般団信/がん100/3大疾病/無団信/ワイド団信"
+  },
+  {
+    "id": "年収_合算者",
+    "label": "年収（合算者）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "年齢_合算者",
+    "label": "年齢（合算者）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "借入希望年数_合算者",
+    "label": "借入希望年数(合算者）",
+    "type": "number",
+    "options": null,
+    "meta_method": "nan"
+  },
+  {
+    "id": "雇用形態（合算者）",
+    "label": "雇用形態（合算者）",
+    "type": "select",
+    "options": [
+      "正社員",
+      "契約",
+      "派遣",
+      "パート"
+    ],
+    "meta_method": "正社員/契約/派遣/パート"
+  },
+  {
+    "id": "勤続_合算者",
+    "label": "勤続（合算者）",
+    "type": "select",
+    "options": [
+      "１ヵ月",
+      "３ヵ月",
+      "半年",
+      "1年",
+      "2年",
+      "3年以上"
+    ],
+    "meta_method": "１ヵ月/３ヵ月/半年/1年/2年/3年以上"
+  },
+  {
+    "id": "代表_合算者",
+    "label": "代表（合算者）",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "自営_合算者",
+    "label": "自営（合算者）",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "産休育休_合算者",
+    "label": "産休育休（合算者）",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "他借入の返済額_万円_月_合算者",
+    "label": "他借入の返済額（万円／月）（合算者）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "持病の有無（合算者）",
+    "label": "持病の有無（合算者）",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "団信（合算者）",
+    "label": "団信(合算者）",
+    "type": "select",
+    "options": [
+      "一般団信",
+      "がん100",
+      "3大疾病",
+      "無団信",
+      "ワイド団信"
+    ],
+    "meta_method": "一般団信/がん100/3大疾病/無団信/ワイド団信"
+  },
+  {
+    "id": "特殊属性の入力",
+    "label": "特殊属性の入力",
+    "type": "button",
+    "options": null,
+    "meta_method": "クリック"
+  },
+  {
+    "id": "親族居住用融資",
+    "label": "親族居住用融資",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "婚姻前",
+    "label": "婚姻前",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "永住権なし",
+    "label": "永住権なし",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "lgbtq",
+    "label": "LGBTQ",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "事実婚",
+    "label": "事実婚",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "融資範囲の入力",
+    "label": "融資範囲の入力",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "諸費用込ローン",
+    "label": "諸費用込ローン",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "リフォーム",
+    "label": "リフォーム",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "買替（買い先行）",
+    "label": "買替（買い先行）",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "つなぎ融資",
+    "label": "つなぎ融資",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "おまとめローン",
+    "label": "おまとめローン",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "物件情報入力",
+    "label": "物件情報入力",
+    "type": "button",
+    "options": null,
+    "meta_method": "クリック"
+  },
+  {
+    "id": "再建築不可",
+    "label": "再建築不可",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "築年（年）ex 1998",
+    "label": "築年（年）ex 1998",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "借地権",
+    "label": "借地権",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "既存不適格",
+    "label": "既存不適格",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
+    "id": "専有面積",
+    "label": "専有面積（㎡）",
+    "type": "number",
+    "options": null,
+    "meta_method": "ナンバー"
+  },
+  {
+    "id": "自主管理",
+    "label": "自主管理",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  }
+]
