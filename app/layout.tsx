@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// app/layout.tsx
+import FloatingContactButton from "@/components/FloatingContactButton";
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +44,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        
+
         {/* Service Worker登録スクリプト */}
         <script
           dangerouslySetInnerHTML={{
@@ -59,6 +63,8 @@ export default function RootLayout({
             `
           }}
         />
+        <FloatingContactButton /> {/* ← 常時表示 */}
+
       </body>
     </html>
   );

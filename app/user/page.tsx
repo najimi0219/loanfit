@@ -4,7 +4,12 @@ import Link from "next/link";
 import SearchForm from "@/components/SearchFormUser";
 import { calculateMaxLoanAmount, formatLoanAmount } from "@/lib/loanCalculator";
 import type { LoanCalculationParams } from "@/lib/loanCalculator";
-import BankDetailModal from "@/components/BankDetailModal";
+import BankDetailModal from "@/components/BankDetailModalUser";
+import FloatingContactButton from "@/components/FloatingContactButton";
+import SupportedBy from "@/components/SupportedBy";
+
+
+
 
 /* ------- Global cosmetic (前と同じ雰囲気) ------- */
 const GLOBAL_CSS = `
@@ -782,7 +787,7 @@ function PasswordScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const CORRECT_PASSWORD = "loanfit2024";
+    const CORRECT_PASSWORD = "vivala";
 
     const handleSubmit = () => {
         setIsLoading(true);
@@ -856,7 +861,7 @@ function PasswordScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
                 {/* ヒント */}
                 <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                     <p className="text-sm text-blue-700 font-medium">パスワードヒント</p>
-                    <p className="text-xs text-blue-600 mt-1">loanfit + 年号4桁</p>
+                    <p className="text-xs text-blue-600 mt-1">運営会社名</p>
                 </div>
             </div>
         </div>
@@ -868,6 +873,10 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedLoan, setSelectedLoan] = useState<HousingLoan | null>(null);
+    const [selectedBankId, setSelectedBankId] = useState<string | null>(null);
+    useEffect(() => {
+        console.log('✅ selectedBankId changed to:', selectedBankId);
+    }, [selectedBankId]);
     const [clearTrigger, setClearTrigger] = useState(0); // 追加
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -1267,13 +1276,26 @@ export default function Home() {
             <header className={`fixed top-0 left-0 right-0 z-20 backdrop-blur border-b border-white/30 dark:border-white/10 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
                 }`}>
                 <div className="mx-auto max-w-7xl px-4 py-3">
-                    <div className="flex items-center justify-between mb-2">
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                            <span className="brand-text">LoanFit</span>
-                            <span className="ml-2 text-slate-700 dark:text-slate-200 text-base md:text-lg">住宅ローン候補検索</span>
-                        </h1>
+                    <div className="flex items-end justify-between mb-2">
+                        {/* 左：ブランド塊（LoanFit＋by）＋ 右にサブタイトル */}
+                        <div className="flex items-end gap-3">
+                            {/* LoanFit＋by を縦に */}
+                            <div className="flex flex-col leading-none">
+                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                                    <span className="brand-text">LoanFit</span>
+                                </h1>
+                                <div className="-mt-1">
+                                    <SupportedBy label="by" />
+                                </div>
+                            </div>
 
-                        {/* ナビゲーションメニュー */}
+                            {/* サブタイトルを同じ行に */}
+                            <span className="text-slate-700 dark:text-slate-200 text-base md:text-lg whitespace-nowrap">
+                                住宅ローン候補検索
+                            </span>
+                        </div>
+
+                        {/* 右：ナビ（そのまま） */}
                         <nav className="flex items-center gap-3">
                             {/* ソート選択 */}
                             <select
@@ -1306,6 +1328,7 @@ export default function Home() {
                             </button>
                         </nav>
                     </div>
+
                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                         ※本サービスで表示される銀行候補・金利はあくまで参考情報です。実際の融資可否や条件は各銀行の審査・最新情報に基づきますので、必ずご自身でご確認ください。
                     </p>
@@ -1388,7 +1411,16 @@ export default function Home() {
                                         <article
                                             key={loan.id}
                                             className="glass rounded-xl p-6 card-hover cursor-pointer"
-                                            onClick={() => setSelectedLoan(loan)}
+                                            onClick={() => {
+                                                console.log('🔥 Card clicked!');
+                                                console.log('🔥 loan.id:', loan.id);
+                                                console.log('🔥 loan.bank_name:', loan.bank_name);
+
+                                                setSelectedLoan(loan);
+                                                setSelectedBankId(loan.id);
+
+                                                console.log('🔥 After setState called');
+                                            }}
                                         >
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
@@ -1465,11 +1497,11 @@ export default function Home() {
                                                     )}
 
 
-                                                    {loan.features && (
+                                                    {/*{loan.features && (
                                                         <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                                                             {loan.features}
                                                         </p>
-                                                    )}
+                                                    )}*/}
 
                                                     {/* 合計借入可能額表示（特徴の下） */}
                                                     {/* 借入可能額と希望額の表示（単独・単身・合算すべてに対応） */}
@@ -1973,7 +2005,7 @@ export default function Home() {
                                                         return null;
                                                     })()}
 
-                                                    {/* 返済比率情報 */}
+                                                    {/* 返済比率情報 
                                                     {(loan.calculationResult || loan.combinedCalculationResult) && (
                                                         <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                                                             {loan.calculationResult && (
@@ -1993,7 +2025,7 @@ export default function Home() {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                    )}
+                                                    )}*/}
                                                 </div>
 
                                                 {/* 団信情報 */}
@@ -2068,14 +2100,24 @@ export default function Home() {
                         </>
                     )}
                 </section>
+
+
             </main>
+
+
+
 
             {/* 銀行詳細モーダル */}
             <BankDetailModal
                 loan={selectedLoan}
-                onClose={() => setSelectedLoan(null)}
+                onClose={() => {
+                    setSelectedLoan(null);
+                    setSelectedBankId(null); // ボタンも同時に非表示
+                }}
             />
         </div>
+
     );
+
 }
 
