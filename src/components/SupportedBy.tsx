@@ -5,7 +5,7 @@ import React from "react";
 const COLORS = {
   blue: "#007FFF",
   gold: "#FFD700",
-  red:  "#ff0000",
+  red:  "#ff0000"
 };
 
 type Props = {
@@ -21,13 +21,10 @@ export default function SupportedBy({ label = "by", href }: Props) {
       aria-label="Vivalapartner"
       title="Vivalapartner"
     >
-      <span style={{ color: COLORS.blue }}>V</span>
-      <span style={{ color: COLORS.blue }}>i</span>
-      <span style={{ color: COLORS.gold }}>v</span>
-      <span style={{ color: COLORS.gold }}>α</span>
-      <span style={{ color: COLORS.blue }}>l</span>
-      <span style={{ color: COLORS.red }}>α</span>
-      <span style={{ color: COLORS.blue }}>partner</span>
+      <span style={{ color: COLORS.blue }}>Vi</span>
+      <span style={{ color: COLORS.gold }}>va</span>
+      <span style={{ color: COLORS.red }}>la</span>
+      <span style={{ color: COLORS.red }}>partner</span>
     </span>
   );
 

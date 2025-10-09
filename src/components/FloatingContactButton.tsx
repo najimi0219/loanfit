@@ -184,7 +184,7 @@ export default function FloatingContactButton() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onClick={onClick}
-        className={`fixed z-50 rounded-full shadow-lg bg-indigo-600 text-white font-medium px-5 py-3 hover:bg-indigo-700 ${
+        className={`fixed z-50 rounded-full shadow-lg bg-[#007FFF] text-white font-medium px-5 py-3 hover:bg-[#0066CC] ${
           dragging.current ? "cursor-grabbing" : "cursor-grab"
         }`}
         style={{ left: pos.x, top: pos.y }}
