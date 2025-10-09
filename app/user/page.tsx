@@ -1360,7 +1360,7 @@ export default function Home() {
                                             {filteredLoansWithCalculation.length} / {allLoans.length} 件
                                         </div>
                                         <div className="text-xs mt-1">
-                                            条件に一致する商品
+                                            条件に一致する銀行
                                         </div>
                                     </div>
                                 )}
