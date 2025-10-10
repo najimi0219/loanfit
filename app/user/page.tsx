@@ -1272,16 +1272,17 @@ export default function Home() {
         <div className="min-h-screen gradient-hero bg-grid">
             <style>{GLOBAL_CSS}</style>
 
-            {/* ヘッダー：LoanFit ロゴ + ナビゲーション */}
+            {/* 🔥 修正: ヘッダー部分の完全リニューアル */}
             <header className={`fixed top-0 left-0 right-0 z-20 backdrop-blur border-b border-white/30 dark:border-white/10 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
                 }`}>
-                <div className="mx-auto max-w-7xl px-2 sm:px-4 py-2 sm:py-3">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-2 mb-2">
-                        {/* 左：ブランド塊（LoanFit＋by）＋ 右にサブタイトル */}
-                        <div className="flex items-end gap-2 sm:gap-3">
-                            {/* LoanFit＋by を縦に */}
+                <div className="mx-auto max-w-7xl px-2 sm:px-4 py-2">
+                    {/* 🔥 修正: トップ行 - ブランディングとナビゲーション */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        {/* 左側: ブランド部分 */}
+                        <div className="flex items-end gap-2 flex-shrink-0">
+                            {/* LoanFit + by を縦に */}
                             <div className="flex flex-col leading-none">
-                                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
+                                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight">
                                     <span className="brand-text">LoanFit</span>
                                 </h1>
                                 <div className="-mt-1">
@@ -1289,60 +1290,63 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* サブタイトルを同じ行に */}
-                            <span className="text-slate-700 dark:text-slate-200 text-sm sm:text-base md:text-lg whitespace-nowrap">
+                            {/* サブタイトル */}
+                            <span className="text-slate-700 dark:text-slate-200 text-xs sm:text-sm md:text-base lg:text-lg whitespace-nowrap">
                                 住宅ローン候補検索
                             </span>
                         </div>
 
-                        {/* 右：ナビ */}
-                        <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 w-full sm:w-auto">
+                        {/* 右側: ナビゲーション - より柔軟なレイアウト */}
+                        <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             {/* ソート選択 */}
                             <select
                                 value={filters["ソート"] || ""}
                                 onChange={(e) => setFilters({ ...filters, ソート: e.target.value })}
-                                className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent flex-shrink-0"
+                                className="px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent min-w-0"
                             >
-                                <option value="">ソート選択</option>
-                                <option value="適用金利">適用金利</option>
-                                <option value="借入可能額">借入可能額</option>
+                                <option value="">ソート</option>
+                                <option value="適用金利">金利</option>
+                                <option value="借入可能額">金額</option>
                             </select>
 
-                            {/* 返比超過チェックボックス */}
-                            <label className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 cursor-pointer border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex-shrink-0">
+                            {/* 返比超過チェックボックス - より小さく */}
+                            <label className="flex items-center gap-1 px-2 py-1.5 cursor-pointer border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                 <input
                                     type="checkbox"
                                     checked={Boolean(filters["返比超過"])}
                                     onChange={(e) => setFilters({ ...filters, 返比超過: e.target.checked })}
-                                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                    className="w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                                 />
-                                <span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">返比超過</span>
+                                <span className="text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">返比超過</span>
                             </label>
 
                             {/* 条件クリアボタン */}
                             <button
                                 onClick={handleClearFilters}
-                                className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 border border-slate-300 dark:border-slate-600 whitespace-nowrap flex-shrink-0"
+                                className="px-2 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 border border-slate-300 dark:border-slate-600 whitespace-nowrap"
                             >
-                                条件クリア
+                                クリア
                             </button>
                         </nav>
                     </div>
 
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {/* 🔥 修正: 注意書き - 小さいフォントで改行 */}
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-500 dark:text-slate-400 leading-tight">
                         ※本サービスで表示される銀行候補・金利はあくまで参考情報です。実際の融資可否や条件は各銀行の審査・最新情報に基づきますので、必ずご自身でご確認ください。
                     </p>
                 </div>
             </header>
 
-            {/* メインコンテンツ：左フィルター / 右結果一覧 */}
-            <main className="mx-auto max-w-7xl px-4 py-6 pt-32 grid gap-8 grid-cols-1 lg:grid-cols-4">
+            {/* 🔥 修正: メインコンテンツ - パディング調整 */}
+            <main className="mx-auto max-w-7xl px-2 sm:px-4 py-4 pt-28 sm:pt-32 grid gap-4 sm:gap-8 grid-cols-1 lg:grid-cols-4">
 
-                {/* 左：検索条件（sticky） */}
-                {/* 左：検索条件 */}
+                {/* 左: 検索条件 */}
                 <aside className="lg:col-span-1">
-                    <div className="glass rounded-2xl p-3 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
-                        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-slate-800 dark:text-slate-100">検索条件</h2>
+                    <div className="glass rounded-2xl p-3 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto custom-scrollbar">
+                        <h2 className="text-sm sm:text-base lg:text-lg font-semibold mb-3 sm:mb-4 text-slate-800 dark:text-slate-100">検索条件</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 sm:mb-4">
+                            各項目入力すると自動検索
+                        </p>
 
                         {/* リアルタイムフィルタリング用フォーム */}
                         <SearchForm

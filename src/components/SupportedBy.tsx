@@ -1,11 +1,13 @@
 "use client";
 
+import { Grenze } from "next/font/google";
 import React from "react";
 
 const COLORS = {
   blue: "#007FFF",
   gold: "#FFD700",
-  red:  "#ff0000"
+  red:  "#ff0000",
+ 
 };
 
 type Props = {
@@ -24,7 +26,7 @@ export default function SupportedBy({ label = "by", href }: Props) {
       <span style={{ color: COLORS.blue }}>Vi</span>
       <span style={{ color: COLORS.gold }}>va</span>
       <span style={{ color: COLORS.red }}>la</span>
-      <span style={{ color: COLORS.red }}>partner</span>
+      <span style={{ color: COLORS.blue }}>partner</span>
     </span>
   );
 

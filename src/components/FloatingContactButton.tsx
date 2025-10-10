@@ -54,19 +54,11 @@ export default function FloatingContactButton() {
   // --- 初期位置（右下）＆保存位置の復元 ---
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = localStorage.getItem("floating_contact_pos");
     const iw = window.innerWidth;
     const ih = window.innerHeight;
     const bx = Math.max(16, iw - 88);
     const by = Math.max(16, ih - 88);
-    try {
-      const parsed = saved ? (JSON.parse(saved) as Partial<Pos>) : null;
-      const x = typeof parsed?.x === "number" ? parsed.x : bx;
-      const y = typeof parsed?.y === "number" ? parsed.y : by;
-      setPos({ x, y });
-    } catch {
-      setPos({ x: bx, y: by });
-    }
+    setPos({ x: bx, y: by });
     setReady(true);
 
     const onResize = () => setPos((p) => clampToViewport(p, btnRef.current));
@@ -107,9 +99,7 @@ export default function FloatingContactButton() {
   const onPointerUp: React.PointerEventHandler<HTMLButtonElement> = (e) => {
     if (!dragging.current) return;
     dragging.current = false;
-    try {
-      localStorage.setItem("floating_contact_pos", JSON.stringify(pos));
-    } catch {}
+    // localStorage への保存を削除
     e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
@@ -184,9 +174,8 @@ export default function FloatingContactButton() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onClick={onClick}
-        className={`fixed z-50 rounded-full shadow-lg bg-[#007FFF] text-white font-medium px-5 py-3 hover:bg-[#0066CC] ${
-          dragging.current ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className={`fixed z-50 rounded-full shadow-lg bg-[#007FFF] text-white font-medium px-5 py-3 hover:bg-[#0066CC] ${dragging.current ? "cursor-grabbing" : "cursor-grab"
+          }`}
         style={{ left: pos.x, top: pos.y }}
         title="お問い合わせを開く（ドラッグで移動）"
       >
