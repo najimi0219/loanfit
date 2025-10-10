@@ -1,4 +1,8 @@
 "use client";
+{/*vivala　page*/}
+
+
+
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import SearchForm from "@/components/SearchFormUser";
@@ -1338,7 +1342,7 @@ export default function Home() {
             </header>
 
             {/* 🔥 修正: メインコンテンツ - パディング調整 */}
-            <main className="mx-auto max-w-7xl px-2 sm:px-4 py-4 pt-28 sm:pt-32 grid gap-4 sm:gap-8 grid-cols-1 lg:grid-cols-4">
+            <main className="mx-auto max-w-7xl px-2 sm:px-4 py-4 pt-36 sm:pt-32 grid gap-4 sm:gap-8 grid-cols-1 lg:grid-cols-4">
 
                 {/* 左: 検索条件 */}
                 <aside className="lg:col-span-1">

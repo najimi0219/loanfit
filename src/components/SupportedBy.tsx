@@ -1,25 +1,25 @@
 "use client";
 
-import { Grenze } from "next/font/google";
 import React from "react";
 
 const COLORS = {
   blue: "#007FFF",
   gold: "#FFD700",
-  red:  "#ff0000",
- 
+  red: "#ff0000",
 };
 
 type Props = {
-  // 表記を変えたい時だけ差し替え
-  label?: string; // 既定: "supported by"
-  href?: string;  // 企業サイト等にリンクしたければ指定
+  label?: string;
+  href?: string;
 };
 
 export default function SupportedBy({ label = "by", href }: Props) {
   const Brand = (
     <span
-      className="font-semibold tracking-wide"
+      className="font-bold tracking-wide"
+      style={{
+        textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 8px rgba(255,255,255,0.8)'
+      }}
       aria-label="Vivalapartner"
       title="Vivalapartner"
     >
@@ -34,7 +34,7 @@ export default function SupportedBy({ label = "by", href }: Props) {
     <div className="mt-1 text-xs sm:text-sm text-slate-500 flex items-center gap-2 whitespace-nowrap">
       <span>{label}</span>
       {href ? (
-        <a href={href} target="_blank" className="hover:underline">
+        <a href={href} target="_blank" className="hover:opacity-80 transition-opacity">
           {Brand}
         </a>
       ) : (

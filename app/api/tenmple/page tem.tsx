@@ -1,4 +1,7 @@
 "use client";
+{/*テンプレ　page*/}
+
+
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import SearchForm from "@/components/SearchForm";
@@ -1307,9 +1310,8 @@ export default function Home() {
       <main className="mx-auto max-w-7xl px-4 py-6 pt-32 grid gap-8 grid-cols-1 lg:grid-cols-4">
 
         {/* 左：検索条件（sticky） */}
-        <aside className="lg:col-span-1 lg:h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pr-2 overscroll-contain custom-scrollbar">
-          <div className="glass rounded-2xl p-5">
-            <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-100">Search Conditions</h2>
+        <aside className="lg:col-span-1 lg:pr-2">          <div className="glass rounded-2xl p-5">
+            <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-100">検索条件</h2>
             {/* リアルタイムフィルタリング用フォーム */}
             <SearchForm
               key={clearTrigger}
@@ -1335,8 +1337,8 @@ export default function Home() {
         </aside>
 
         {/* 右：検索結果一覧 */}
-        <section className="lg:col-span-3 space-y-4 lg:h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pl-2 overscroll-contain custom-scrollbar">
-          <div className="flex items-center justify-between">
+        <section className="lg:col-span-3 space-y-4 lg:pl-2">
+        <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
               住宅ローン一覧
             </h2>
