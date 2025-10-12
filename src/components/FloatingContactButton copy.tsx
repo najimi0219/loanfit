@@ -23,7 +23,7 @@ declare global {
 }
 
 export default function FloatingContactButton() {
-  // --- シングルトン(重複配置の保険) ---
+  // --- シングルトン（重複配置の保険） ---
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -51,32 +51,17 @@ export default function FloatingContactButton() {
   const dragged = useRef(false);
   const startOffset = useRef({ x: 0, y: 0 });
 
-  // --- 初期位置(右下)&保存位置の復元 ---
+  // --- 初期位置（右下）＆保存位置の復元 ---
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
-    // 🔥 ボタンのサイズを考慮した初期位置計算
-    const updateInitialPosition = () => {
-      const iw = window.innerWidth;
-      const ih = window.innerHeight;
-      const pad = 16;
-      
-      // ボタンの実際のサイズを取得（まだレンダリングされていない場合は推定値）
-      const bw = btnRef.current?.offsetWidth || 280; // デスクトップ想定
-      const bh = btnRef.current?.offsetHeight || 50;
-      
-      const bx = Math.max(pad, iw - bw - pad);
-      const by = Math.max(pad, ih - bh - pad);
-      setPos({ x: bx, y: by });
-    };
-    
-    updateInitialPosition();
+    const iw = window.innerWidth;
+    const ih = window.innerHeight;
+    const bx = Math.max(16, iw - 88);
+    const by = Math.max(16, ih - 88);
+    setPos({ x: bx, y: by });
     setReady(true);
 
-    // 🔥 リサイズ時も四隅にスナップ
-    const onResize = () => {
-      snapToCorner();
-    };
+    const onResize = () => setPos((p) => clampToViewport(p, btnRef.current));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -114,52 +99,9 @@ export default function FloatingContactButton() {
   const onPointerUp: React.PointerEventHandler<HTMLButtonElement> = (e) => {
     if (!dragging.current) return;
     dragging.current = false;
+    // localStorage への保存を削除
     e.currentTarget.releasePointerCapture(e.pointerId);
-    
-    // 🔥 ドラッグ終了時に最寄りの角にスナップ
-    if (dragged.current) {
-      snapToCorner();
-    }
   };
-
-  // 🔥 最も近い角にスナップする関数
-  function snapToCorner() {
-    if (typeof window === "undefined") return;
-    const iw = window.innerWidth;
-    const ih = window.innerHeight;
-    const pad = 16;
-    const bw = btnRef.current?.offsetWidth ?? 64;
-    const bh = btnRef.current?.offsetHeight ?? 48;
-
-    // 現在のボタン中心位置
-    const centerX = pos.x + bw / 2;
-    const centerY = pos.y + bh / 2;
-
-    // 4つの角の座標
-    const corners = [
-      { x: pad, y: pad, name: "左上" },
-      { x: iw - bw - pad, y: pad, name: "右上" },
-      { x: pad, y: ih - bh - pad, name: "左下" },
-      { x: iw - bw - pad, y: ih - bh - pad, name: "右下" },
-    ];
-
-    // 最も近い角を見つける
-    let nearest = corners[0];
-    let minDist = Infinity;
-
-    for (const corner of corners) {
-      const cornerCenterX = corner.x + bw / 2;
-      const cornerCenterY = corner.y + bh / 2;
-      const dist = Math.hypot(centerX - cornerCenterX, centerY - cornerCenterY);
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = corner;
-      }
-    }
-
-    // スナップアニメーション
-    setPos({ x: nearest.x, y: nearest.y });
-  }
 
   const onClick = () => {
     if (dragged.current) {
@@ -169,7 +111,7 @@ export default function FloatingContactButton() {
     setOpen(true);
   };
 
-  // --- 実寸でモーダル位置を再計算(見切れ防止) ---
+  // --- 実寸でモーダル位置を再計算（見切れ防止） ---
   function recomputeModalStyle() {
     if (typeof window === "undefined" || !btnRef.current) return;
 
@@ -232,17 +174,16 @@ export default function FloatingContactButton() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onClick={onClick}
-        className={`fixed z-50 rounded-full shadow-lg bg-[#007FFF] text-white font-medium px-5 py-3 hover:bg-[#0066CC] transition-all duration-200 whitespace-nowrap ${
-          dragging.current ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className={`fixed z-50 rounded-full shadow-lg bg-[#007FFF] text-white font-medium px-5 py-3 hover:bg-[#0066CC] ${dragging.current ? "cursor-grabbing" : "cursor-grab"
+          }`}
         style={{ left: pos.x, top: pos.y }}
-        title="お問い合わせを開く(ドラッグで移動)"
+        title="お問い合わせを開く（ドラッグで移動）"
       >
-        <span className="hidden sm:inline">銀行詳細・不動産相談はこちら</span>
+        <span className="hidden sm:inline">銀行の詳細の確認、不動産の相談はこちらから</span>
         <span className="sm:hidden">相談する</span>
       </button>
 
-      {/* 背景(クリックで閉じる) */}
+      {/* 背景（クリックで閉じる） */}
       {open && (
         <div
           className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm"
@@ -250,7 +191,7 @@ export default function FloatingContactButton() {
         />
       )}
 
-      {/* モーダル(ボタン付近に出す・見切れ防止) */}
+      {/* モーダル（ボタン付近に出す／見切れ防止） */}
       {open && (
         <div
           ref={modalRef}
@@ -273,11 +214,11 @@ export default function FloatingContactButton() {
           <div className="p-5 space-y-4 text-sm text-slate-800">
             <div className="space-y-1">
               <div className="font-medium">{CONTACT.orgLabel}</div>
-              <div>運営会社:{CONTACT.company}</div>
-              <div>担当者:{CONTACT.person}</div>
+              <div>運営会社：{CONTACT.company}</div>
+              <div>担当者：{CONTACT.person}</div>
 
               <div className="flex items-center gap-2">
-                <span>電話番号:</span>
+                <span>電話番号：</span>
                 <a className="text-indigo-600 underline" href={`tel:${CONTACT.tel}`}>
                   {CONTACT.tel}
                 </a>
@@ -292,7 +233,7 @@ export default function FloatingContactButton() {
               <div className="mt-3">
                 <div className="font-medium mb-1">LINE 友だち追加</div>
                 <div className="flex items-center gap-2">
-                  <span>ID:{CONTACT.lineId}</span>
+                  <span>ID：{CONTACT.lineId}</span>
                   <button
                     onClick={() => navigator.clipboard?.writeText(CONTACT.lineId)}
                     className="text-xs rounded border px-2 py-0.5 hover:bg-slate-50"
@@ -301,7 +242,7 @@ export default function FloatingContactButton() {
                   </button>
                 </div>
                 <div className="break-all">
-                  URL:
+                  URL：
                   <a className="text-indigo-600 underline" href={CONTACT.lineUrl} target="_blank">
                     {CONTACT.lineUrl}
                   </a>
