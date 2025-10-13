@@ -5,14 +5,18 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic"; // ← 追加
 import SearchForm from "@/components/SearchFormUser";
 import { calculateMaxLoanAmount, formatLoanAmount } from "@/lib/loanCalculator";
 import type { LoanCalculationParams } from "@/lib/loanCalculator";
 import BankDetailModal from "@/components/BankDetailModalUser";
-import FloatingContactButton from "@/components/FloatingContactButton";
+// import FloatingContactButton from "@/components/FloatingContactButton"; // ← 削除
 import SupportedBy from "@/components/SupportedBy";
 
-
+const FloatingContactButton = dynamic(
+    () => import("@/components/FloatingContactButton"),
+    { ssr: false }
+  );
 
 
 /* ------- Global cosmetic (前と同じ雰囲気) ------- */
