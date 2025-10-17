@@ -5,7 +5,6 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import PasswordScreen from "@/components/PasswordScreen"; // ← 追加
 import SearchForm from "@/components/SearchFormUser";
 import { calculateMaxLoanAmount, formatLoanAmount } from "@/lib/loanCalculator";
 import type { LoanCalculationParams } from "@/lib/loanCalculator";
@@ -800,7 +799,6 @@ export default function Home() {
         console.log('✅ selectedBankId changed to:', selectedBankId);
     }, [selectedBankId]);
     const [clearTrigger, setClearTrigger] = useState(0); // 追加
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -1159,18 +1157,7 @@ export default function Home() {
         return filteredResult;
     }, [allLoans, filters]);
 
-    if (!isAuthenticated) {
-        return (
-            <PasswordScreen
-                postUrl="/api/auth/root"
-                title="（サイト全体）アクセス保護"
-                hint="運営会社名"
-                defaultNext="/"
-            // nextParam は必要なら付与（page の props から受け取れる場合）
-            // nextParam={searchParams?.next}
-            />
-        );
-    }
+   
 
 
     // フィルター更新ハンドラ

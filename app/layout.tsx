@@ -45,7 +45,7 @@ export default function RootLayout({
       >
         {children}
 
-        {/* Service Worker登録スクリプト */}
+        {/* Service Worker登録スクリプト
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -62,7 +62,7 @@ export default function RootLayout({
               }
             `
           }}
-        />
+        /> */}
         <FloatingContactButton /> {/* ← 常時表示 */}
 
       </body>
