@@ -110,73 +110,50 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
   const handleSave = async () => {
     setIsSaving(true);
     setSaveMessage(null);
-  
+
     console.log('保存開始:', editedLoan?.id);
-  
+    console.log('送信データ:', editedLoan);
+
     try {
       if (!editedLoan) {
         throw new Error('編集データがありません');
       }
-  
-      // 数値フィールドの空文字列をnullに変換
-      const cleanedData = { ...editedLoan };
-      const numericFields = [
-        'min_annual_income_man_yen',
-        'max_loan_amount',
-        'interest_rate',
-        'screening_rate',
-        'max_repayment_age',
-        'max_loan_period_years',
-        'debt_ratio_0_399',
-        'debt_ratio_400_plus',
-        'employment_regular_months',
-        'employment_contract_months',
-        'employment_dispatch_months',
-        'ms_area_limit_sqm'
-      ];
-  
-      numericFields.forEach(field => {
-        if (cleanedData[field] === '' || cleanedData[field] === undefined) {
-          cleanedData[field] = null;
-        }
-      });
-  
-      console.log('送信データ（クリーンアップ後）:', cleanedData);
-  
+
       const url = `/api/housing-loans/${editedLoan.id}`;
       console.log('リクエストURL:', url);
-  
-
-
 
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(cleanedData),
+        body: JSON.stringify(editedLoan),
       });
-  
+
       console.log('レスポンスステータス:', response.status);
-  
+
+      // レスポンスのテキストを取得
       const responseText = await response.text();
       console.log('レスポンステキスト:', responseText);
-  
+
       if (!response.ok) {
+        // JSONとしてパースを試みる
         try {
           const result = JSON.parse(responseText);
           throw new Error(result.error || '保存に失敗しました');
         } catch (e) {
+          // JSONパースに失敗した場合は、そのままテキストを使う
           throw new Error(`保存に失敗しました: ${responseText || response.statusText}`);
         }
       }
-  
+
+      // 成功時もJSONとしてパース
       const result = JSON.parse(responseText);
       console.log('レスポンスデータ:', result);
-  
+
       setSaveMessage('✓ 保存しました');
       setIsEditing(false);
-  
+
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error: any) {
       console.error('保存エラー:', error);
@@ -194,52 +171,9 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
   };
 
   // フィールド値を更新
- // AdminBankDetailModal.tsx
-const updateField = (field: string, value: any) => {
-  setEditedLoan(prev => {
-    if (!prev) return null;
-    
-    let processedValue = value;
-    
-    // 数値フィールドのリスト
-    const numericFields = [
-      'min_annual_income_man_yen',
-      'max_loan_amount',
-      'interest_rate',
-      'screening_rate',
-      'max_repayment_age',
-      'max_loan_period_years',
-      'debt_ratio_0_399',
-      'debt_ratio_400_plus',
-      'employment_regular_months',
-      'employment_contract_months',
-      'employment_dispatch_months',
-      'ms_area_limit_sqm'
-    ];
-    
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      
-      if (trimmed === '') {
-        // 空文字列はnullに変換
-        processedValue = null;
-      } else if (numericFields.includes(field)) {
-        // 数値フィールドは数値に変換
-        const num = parseFloat(trimmed);
-        processedValue = isNaN(num) ? null : num;
-      } else {
-        processedValue = trimmed;
-      }
-    } else if (value === undefined || value === '') {
-      processedValue = null;
-    }
-    
-    return { 
-      ...prev, 
-      [field]: processedValue 
-    };
-  });
-};
+  const updateField = (field: string, value: any) => {
+    setEditedLoan(prev => prev ? { ...prev, [field]: value } : null);
+  };
 
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return '-';

@@ -1,5 +1,5 @@
 "use client";
-{/*vivala　page*/}
+{/*vivala　page*/ }
 
 
 import { useMemo, useState, useEffect } from "react";
@@ -12,9 +12,10 @@ import type { LoanCalculationParams } from "@/lib/loanCalculator";
 import BankDetailModal from "@/components/BankDetailModalUser";
 import SupportedBy from "@/components/SupportedBy";
 
+
 const FloatingContactButton = dynamic(
-  () => import("@/components/FloatingContactButton"),
-  { ssr: false }
+    () => import("@/components/FloatingContactButton"),
+    { ssr: false }
 );
 
 
@@ -803,7 +804,7 @@ export default function Home() {
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-  
+
 
     // 全ての住宅ローンデータを取得
     useEffect(() => {
@@ -1159,8 +1160,18 @@ export default function Home() {
     }, [allLoans, filters]);
 
     if (!isAuthenticated) {
-        return <PasswordScreen onAuthenticated={() => setIsAuthenticated(true)} />;
+        return (
+            <PasswordScreen
+                postUrl="/api/auth/root"
+                title="（サイト全体）アクセス保護"
+                hint="運営会社名"
+                defaultNext="/"
+            // nextParam は必要なら付与（page の props から受け取れる場合）
+            // nextParam={searchParams?.next}
+            />
+        );
     }
+
 
     // フィルター更新ハンドラ
     const handleFilterChange = (newFilters: Record<string, any>) => {
