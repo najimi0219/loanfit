@@ -17,6 +17,7 @@ export function middleware(req: NextRequest) {
 
   const authedRoot = req.cookies.get("auth_root")?.value === "1";
   const authedUser = req.cookies.get("auth_user")?.value === "1";
+  const authedAdmin = req.cookies.get("auth_admin")?.value === "1";
 
   // ------------------------
   // /user 配下の保護
@@ -50,6 +51,25 @@ export function middleware(req: NextRequest) {
   // ルート配下の保護（/password を含めた制御）
   // ------------------------
 
+  // /admin 配下
+  if (pathname.startsWith("/admin")) {
+    if (pathname === "/admin/password") {
+      if (authedAdmin) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/admin";
+        url.search = "";
+        return NextResponse.redirect(url);
+      }
+      return NextResponse.next();
+    }
+    if (!authedAdmin) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin/password";
+      url.searchParams.set("next", pathname + (req.nextUrl.search || ""));
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
   // /password 自体は例外。認証済みなら next または / へ返す（←コレが無いと無限ループ）
   if (pathname === "/password") {
     if (authedRoot) {

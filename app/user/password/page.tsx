@@ -5,8 +5,8 @@ export default async function RootPasswordPage({ searchParams }: { searchParams:
   return (
     <PasswordScreen
       postUrl="/api/auth/user"
-      title="（サイト全体）アクセス保護"
-      hint="運営会社名"
+      title="アクセス保護"
+      hint="パスワードがわからない人はお問い合わせください"
       defaultNext="/"
       nextParam={params?.next}
     />

@@ -9,9 +9,9 @@ export default function RootPasswordPage({
 
   return (
     <PasswordScreen
-      postUrl="/api/auth/root"
-      title="(vivala)アクセス保護"
-      hint="パスワードがわからない人はお問い合わせください"
+      postUrl="/api/auth/admin"
+      title="（管理画面）アクセス保護"
+      hint="清水さんの一番大事なもの"
       defaultNext="/"
       nextParam={nextParam}
     />
