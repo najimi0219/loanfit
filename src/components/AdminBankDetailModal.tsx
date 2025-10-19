@@ -110,14 +110,14 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
   const handleSave = async () => {
     setIsSaving(true);
     setSaveMessage(null);
-  
+
     console.log('保存開始:', editedLoan?.id);
-  
+
     try {
       if (!editedLoan) {
         throw new Error('編集データがありません');
       }
-  
+
       // 数値フィールドの空文字列をnullに変換
       const cleanedData = { ...editedLoan };
       const numericFields = [
@@ -134,18 +134,18 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
         'employment_dispatch_months',
         'ms_area_limit_sqm'
       ];
-  
+
       numericFields.forEach(field => {
         if (cleanedData[field] === '' || cleanedData[field] === undefined) {
           cleanedData[field] = null;
         }
       });
-  
+
       console.log('送信データ（クリーンアップ後）:', cleanedData);
-  
+
       const url = `/api/housing-loans/${editedLoan.id}`;
       console.log('リクエストURL:', url);
-  
+
 
 
 
@@ -156,12 +156,12 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
         },
         body: JSON.stringify(cleanedData),
       });
-  
+
       console.log('レスポンスステータス:', response.status);
-  
+
       const responseText = await response.text();
       console.log('レスポンステキスト:', responseText);
-  
+
       if (!response.ok) {
         try {
           const result = JSON.parse(responseText);
@@ -170,13 +170,13 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
           throw new Error(`保存に失敗しました: ${responseText || response.statusText}`);
         }
       }
-  
+
       const result = JSON.parse(responseText);
       console.log('レスポンスデータ:', result);
-  
+
       setSaveMessage('✓ 保存しました');
       setIsEditing(false);
-  
+
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error: any) {
       console.error('保存エラー:', error);
@@ -194,52 +194,52 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
   };
 
   // フィールド値を更新
- // AdminBankDetailModal.tsx
-const updateField = (field: string, value: any) => {
-  setEditedLoan(prev => {
-    if (!prev) return null;
-    
-    let processedValue = value;
-    
-    // 数値フィールドのリスト
-    const numericFields = [
-      'min_annual_income_man_yen',
-      'max_loan_amount',
-      'interest_rate',
-      'screening_rate',
-      'max_repayment_age',
-      'max_loan_period_years',
-      'debt_ratio_0_399',
-      'debt_ratio_400_plus',
-      'employment_regular_months',
-      'employment_contract_months',
-      'employment_dispatch_months',
-      'ms_area_limit_sqm'
-    ];
-    
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      
-      if (trimmed === '') {
-        // 空文字列はnullに変換
+  // AdminBankDetailModal.tsx
+  const updateField = (field: string, value: any) => {
+    setEditedLoan(prev => {
+      if (!prev) return null;
+
+      let processedValue = value;
+
+      // 数値フィールドのリスト
+      const numericFields = [
+        'min_annual_income_man_yen',
+        'max_loan_amount',
+        'interest_rate',
+        'screening_rate',
+        'max_repayment_age',
+        'max_loan_period_years',
+        'debt_ratio_0_399',
+        'debt_ratio_400_plus',
+        'employment_regular_months',
+        'employment_contract_months',
+        'employment_dispatch_months',
+        'ms_area_limit_sqm'
+      ];
+
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+
+        if (trimmed === '') {
+          // 空文字列はnullに変換
+          processedValue = null;
+        } else if (numericFields.includes(field)) {
+          // 数値フィールドは数値に変換
+          const num = parseFloat(trimmed);
+          processedValue = isNaN(num) ? null : num;
+        } else {
+          processedValue = trimmed;
+        }
+      } else if (value === undefined || value === '') {
         processedValue = null;
-      } else if (numericFields.includes(field)) {
-        // 数値フィールドは数値に変換
-        const num = parseFloat(trimmed);
-        processedValue = isNaN(num) ? null : num;
-      } else {
-        processedValue = trimmed;
       }
-    } else if (value === undefined || value === '') {
-      processedValue = null;
-    }
-    
-    return { 
-      ...prev, 
-      [field]: processedValue 
-    };
-  });
-};
+
+      return {
+        ...prev,
+        [field]: processedValue
+      };
+    });
+  };
 
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return '-';
@@ -281,9 +281,22 @@ const updateField = (field: string, value: any) => {
     );
   };
 
-  const SymbolRow = ({ label, value, note, field }: { label: string; value: any; note?: string; field?: string }) => {
-    const displayValue = value === '○' ? '○' : value === '×' ? '×' : '-';
-    const colorClass = value === '○' ? 'text-green-600' : value === '×' ? 'text-red-600' : 'text-slate-400';
+  const SymbolRow = ({
+    label,
+    value,
+    note,
+    field,
+    noteField,
+  }: {
+    label: string;
+    value: any;
+    note?: string | null;
+    field?: string;        // ○/× を入れるフィールド名
+    noteField?: string;    // 下の説明テキストのフィールド名（★追加）
+  }) => {
+    const displayValue = value === '○' ? '○' : value === '×' ? '×' : value === '△' ? '△' : '-';
+    const colorClass = value === '○' ? 'text-green-600' : value === '×' ? 'text-red-600'  : value === '△'
+    ? 'text-orange-500': 'text-slate-400';
 
     return (
       <div className="grid grid-cols-3 gap-4 py-3 border-b border-slate-200 dark:border-slate-700 last:border-0">
@@ -292,35 +305,46 @@ const updateField = (field: string, value: any) => {
         </div>
         <div className="col-span-2 px-3 py-2">
           {isEditing && field ? (
-            <div>
+            <div className="space-y-2">
+              {/* ○/× セレクト */}
               <select
                 value={value || ''}
                 onChange={(e) => updateField(field, e.target.value)}
                 onKeyDown={(e) => {
-                  // ESCキーでセレクトを閉じる
                   if (e.key === 'Escape') {
                     e.stopPropagation();
                     (e.target as HTMLSelectElement).blur();
                   }
                 }}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">-</option>
                 <option value="○">○</option>
+                <option value="△">△</option>  {/* ✅ ← 追加 */}
                 <option value="×">×</option>
               </select>
-              {note && <div className="text-xs text-slate-500 mt-1">{note}</div>}
+
+              {/* 下の説明テキスト（★追加） */}
+              {noteField && (
+                <textarea
+                  defaultValue={note || ''}
+                  onBlur={(e) => updateField(noteField, e.target.value)}
+                  placeholder={`${label} の説明・条件など`}
+                  className="w-full min-h-[64px] px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              )}
             </div>
           ) : (
             <>
               <span className={`text-lg font-bold ${colorClass}`}>{displayValue}</span>
-              {note && <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">{note}</div>}
+              {note && <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 whitespace-pre-wrap">{note}</div>}
             </>
           )}
         </div>
       </div>
     );
   };
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -475,30 +499,35 @@ const updateField = (field: string, value: any) => {
                   value={editedLoan.general_group_insurance}
                   field="general_group_insurance"
                   note={editedLoan.general_group_insurance_features || '【一般団信】金利上乗せなし_満18歳以上満65歳未満'}
+                  noteField="general_group_insurance_features"
                 />
                 <SymbolRow
                   label="ワイド団信"
                   value={editedLoan.wide_group_insurance}
                   field="wide_group_insurance"
                   note={editedLoan.wide_group_insurance_conditions || '【ワイド団信】+0.30%_満18歳以上満65歳以下'}
+                  noteField="wide_group_insurance_conditions"
                 />
                 <SymbolRow
                   label="がん団信100"
                   value={editedLoan.cancer_group_insurance_100}
                   field="cancer_group_insurance_100"
-                  note={editedLoan.cancer_group_insurance_100_notes}
+                  note={editedLoan.cancer_group_insurance_100_notes || ''}
+                  noteField="cancer_group_insurance_100_notes"
                 />
                 <SymbolRow
                   label="三大疾病以上"
                   value={editedLoan.three_major_diseases_plus}
                   field="three_major_diseases_plus"
-                  note={editedLoan.three_major_diseases_plus_conditions}
+                  note={editedLoan.three_major_diseases_plus_conditions || ''}
+                  noteField="three_major_diseases_plus_conditions"
                 />
                 <SymbolRow
                   label="一般団信不加入利用"
                   value={editedLoan.general_insurance_non_participation}
                   field="general_insurance_non_participation"
-                  note={editedLoan.general_insurance_non_participation_notes}
+                  note={editedLoan.general_insurance_non_participation_notes || ''}
+                  noteField="general_insurance_non_participation_notes"
                 />
               </div>
             </section>
