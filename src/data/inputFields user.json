@@ -327,6 +327,13 @@
     "meta_method": "チェック"
   },
   {
+    "id": "分割融資",
+    "label": "分割融資",
+    "type": "checkbox",
+    "options": null,
+    "meta_method": "チェック"
+  },
+  {
     "id": "つなぎ融資",
     "label": "つなぎ融資",
     "type": "checkbox",

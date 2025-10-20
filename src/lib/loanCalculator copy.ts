@@ -3,8 +3,7 @@
 
 export interface LoanCalculationParams {
   annualIncome: number; // 年収（万円）
-  screeningRate: number; // 審査金利（%）- 借入可能額の計算用
-  interestRate: number; // 適用金利（%）- 月返済額の計算用
+  screeningRate: number; // 審査金利（%）
   debtRatio0_399: number | null; // 年収399万以下の返済比率（%）
   debtRatio400Plus: number | null; // 年収400万以上の返済比率（%）
   loanPeriodYears: number; // 借入期間（年）
@@ -13,48 +12,19 @@ export interface LoanCalculationParams {
   age?: number; // 年齢
   maxRepaymentAge?: number; // 完済年齢上限
   maxLoanPeriodYears?: number; // 最長借入期間
-  desiredLoanAmount?: number; // 借入希望額（万円）
 }
 
 export interface LoanCalculationResult {
   maxLoanAmount: number; // 最大借入可能額（万円）
-  monthlyPayment: number; // 月々返済額（円）- 後方互換性のため残す
-  monthlyPaymentFromMax: number; // ①借入可能額からの月返済額（円）
-  monthlyPaymentFromDesired: number | null; // ②借入希望額からの月返済額（円）
+  monthlyPayment: number; // 月々返済額（円）
   applicableDebtRatio: number; // 適用された返済比率（%）
   calculationDetails: {
     annualIncome: number;
     applicableDebtRatio: number;
     maxAnnualPayment: number;
     screeningRate: number;
-    interestRate: number;
     loanPeriodYears: number;
-    desiredLoanAmount: number | null;
   };
-}
-
-/**
- * 月々返済額を計算（元利均等返済）
- */
-function calculateMonthlyPayment(
-  loanAmount: number, // 借入額（万円）
-  annualRate: number, // 年利（%）
-  years: number // 借入期間（年）
-): number {
-  const principal = loanAmount * 10000; // 円に変換
-  const monthlyRate = annualRate / 100 / 12; // 月利
-  const totalMonths = years * 12;
-
-  if (monthlyRate === 0) {
-    // 金利0%の場合
-    return principal / totalMonths;
-  }
-
-  // 元利均等返済の月返済額 = 元金 × (月利 × (1+月利)^返済回数) / ((1+月利)^返済回数 - 1)
-  const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
-                         (Math.pow(1 + monthlyRate, totalMonths) - 1);
-
-  return monthlyPayment;
 }
 
 /**
@@ -64,19 +34,17 @@ export function calculateMaxLoanAmount(params: LoanCalculationParams): LoanCalcu
   const {
     annualIncome,
     screeningRate,
-    interestRate,
     debtRatio0_399,
     debtRatio400Plus,
     existingDebtAnnual = 0,
     requestedYears,
     age,
     maxRepaymentAge,
-    maxLoanPeriodYears,
-    desiredLoanAmount
+    maxLoanPeriodYears
   } = params;
 
   // 入力値の検証
-  if (annualIncome <= 0 || screeningRate <= 0 || interestRate < 0) {
+  if (annualIncome <= 0 || screeningRate <= 0) {
     return null;
   }
 
@@ -131,7 +99,7 @@ export function calculateMaxLoanAmount(params: LoanCalculationParams): LoanCalcu
   // 月間返済可能額
   const maxMonthlyPayment = maxAnnualPayment / 12;
 
-  // 借入可能額を計算（審査金利を使用）
+  // 借入可能額を計算（元利均等返済の逆算）
   const monthlyRate = screeningRate / 100 / 12; // 月利
   const totalMonths = actualLoanPeriodYears * 12;
 
@@ -145,39 +113,16 @@ export function calculateMaxLoanAmount(params: LoanCalculationParams): LoanCalcu
     maxLoanAmount = maxMonthlyPayment * ((1 - Math.pow(1 + monthlyRate, -totalMonths)) / monthlyRate);
   }
 
-  const maxLoanAmountManYen = Math.floor(maxLoanAmount / 10000); // 万円単位に変換
-
-  // ①借入可能額から月返済額を計算（適用金利を使用）
-  const monthlyPaymentFromMax = calculateMonthlyPayment(
-    maxLoanAmountManYen,
-    interestRate,
-    actualLoanPeriodYears
-  );
-
-  // ②借入希望額から月返済額を計算（適用金利を使用）
-  let monthlyPaymentFromDesired: number | null = null;
-  if (desiredLoanAmount && desiredLoanAmount > 0) {
-    monthlyPaymentFromDesired = calculateMonthlyPayment(
-      desiredLoanAmount,
-      interestRate,
-      actualLoanPeriodYears
-    );
-  }
-
   return {
-    maxLoanAmount: maxLoanAmountManYen,
-    monthlyPayment: Math.floor(monthlyPaymentFromMax), // 後方互換性のため
-    monthlyPaymentFromMax: Math.floor(monthlyPaymentFromMax),
-    monthlyPaymentFromDesired: monthlyPaymentFromDesired ? Math.floor(monthlyPaymentFromDesired) : null,
+    maxLoanAmount: Math.floor(maxLoanAmount / 10000), // 万円単位に変換
+    monthlyPayment: Math.floor(maxMonthlyPayment),
     applicableDebtRatio,
     calculationDetails: {
       annualIncome,
       applicableDebtRatio,
       maxAnnualPayment: Math.floor(maxAnnualPayment / 10000), // 万円
       screeningRate,
-      interestRate,
-      loanPeriodYears: actualLoanPeriodYears, // 実際に使用された借入期間
-      desiredLoanAmount: desiredLoanAmount || null
+      loanPeriodYears: actualLoanPeriodYears // 実際に使用された借入期間
     }
   };
 }
@@ -195,7 +140,6 @@ export function formatLoanAmount(amount: number | null): string {
 /**
  * 月々返済額をフォーマット
  */
-export function formatMonthlyPayment(amount: number | null): string {
-  if (amount === null || amount <= 0) return '計算不可';
+export function formatMonthlyPayment(amount: number): string {
   return `${amount.toLocaleString()}円`;
 }

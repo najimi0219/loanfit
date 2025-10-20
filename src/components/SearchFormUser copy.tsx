@@ -1,8 +1,11 @@
-// SearchForm.tsx 並び順最適化版
+// SearchForm.tsx 詳細まで検索できる版
 
 "use client";
 import { useState, useEffect } from "react";
 import inputFields from "@/data/inputFields user.json";
+import React from "react";
+
+
 
 type Field = {
     id: string;
@@ -93,7 +96,7 @@ export default function SearchForm({
             "総額表示",
             "自己資金額",
             // 📥 合算者の資金計画フィールドを追加
-            
+
         ];
 
         const employmentFields = [
@@ -286,7 +289,7 @@ export default function SearchForm({
                     );
                 })}
 
-                
+
 
                 {/* 📥 資金計画セクション(借入名義、借入希望年数、他借入を含む) */}
                 <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -303,78 +306,175 @@ export default function SearchForm({
                     {expandedSections.funding && (
                         <div className="p-4 space-y-4 border-t border-slate-200 dark:border-slate-700">
                             {filteredFields.map((f) => {
+                                // ボタン型は今はスキップ
                                 if (f.type === "button") return null;
-                                if (!shouldShowField(f.id)) return null;
+
+                                // 🔥 資金計画カテゴリーのフィールドのみ表示
                                 if (getFieldCategory(f.id) !== "funding") return null;
 
-                                return (
-                                    <div key={f.id} className="flex flex-col">
-                                        <label className="mb-1 font-medium text-sm text-slate-700 dark:text-slate-300">
-                                            {f.label}
-                                            {f.required && <span className="text-red-500 ml-1">*</span>}
-                                        </label>
+                                // デフォルト表示フィールドは除外（上部に既に表示されているため）
+                                if (defaultDisplayFields.includes(f.id)) return null;
 
-                                        {f.type === "select" ? (
-                                            <select
-                                                value={(values[f.id] ?? "") as string}
-                                                onChange={(e) => handleChange(f.id, e.target.value)}
-                                                required={!!f.required}
-                                                className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
-                                            >
-                                                <option value="">選択してください</option>
-                                                {f.id === "借入名義" ? (
-                                                    <>
-                                                        <option value="単独名義(所帯有)">単独名義(所帯有)</option>
-                                                        <option value="単身者">単身者</option>
-                                                        <option value="ペアローン">ペアローン</option>
-                                                        <option value="収入合算(連帯債務)">収入合算(連帯債務)</option>
-                                                        <option value="収入合算(連帯保証)">収入合算(連帯保証)</option>
-                                                    </>
-                                                ) : (
-                                                    f.options?.map((opt) => (
-                                                        <option key={opt} value={opt}>
-                                                            {opt}
-                                                        </option>
-                                                    ))
-                                                )}
-                                            </select>
-                                        ) : f.id === "総額表示" ? (
-                                            <div className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 min-h-[38px] flex items-center">
-                                                {values[f.id] ? `${values[f.id]}万円` : "物件価格と諸経費を入力すると自動計算されます"}
-                                            </div>
-                                        ) : f.id === "自己資金額" ? (
-                                            <div className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 min-h-[38px] flex items-center">
-                                                {values[f.id] ? `${values[f.id]}万円` : "総額と借入希望額を入力すると自動計算されます"}
-                                            </div>
-                                        ) : f.id === "借入希望年数" ? (
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    inputMode="numeric"
+                                // 合算者項目の除外処理
+                                const loanOwnership = values["借入名義"];
+                                const isCombinedField = ["年収(合算者)", "年収_合算者", "年齢(合算者)", "年齢_合算者", "借入希望年数(合算者)", "借入希望年数_合算者"].includes(f.id);
+
+                                if (isCombinedField) {
+                                    return null;
+                                }
+                                return (
+                                    <React.Fragment key={f.id}>
+                                        <div className="flex flex-col">
+                                            <label className="mb-1 font-medium text-sm text-slate-700 dark:text-slate-300">
+                                                {f.label}
+                                                {f.required && <span className="text-red-500 ml-1">*</span>}
+                                            </label>
+
+                                            {/* 既存のフィールドレンダリング */}
+                                            {f.type === "select" ? (
+                                                <select
                                                     value={(values[f.id] ?? "") as string}
                                                     onChange={(e) => handleChange(f.id, e.target.value)}
                                                     required={!!f.required}
-                                                    placeholder="希望する借入年数を入力"
-                                                    className={`rounded-xl border px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm w-full ${values["_ageWarning"] ? 'border-red-300' : 'border-slate-200'}`}
+                                                    className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                                                >
+                                                    <option value="">選択してください</option>
+                                                    {f.id === "借入名義" ? (
+                                                        <>
+                                                            <option value="単独名義（所帯有）">単独名義（所帯有）</option>
+                                                            <option value="単身者">単身者</option>
+                                                            <option value="ペアローン">ペアローン</option>
+                                                            <option value="収入合算(連帯債務)">収入合算(連帯債務)</option>
+                                                            <option value="収入合算(連帯保証)">収入合算(連帯保証)</option>
+                                                            <option value="婚姻前合算">婚姻前合算</option>
+                                                        </>
+                                                    ) : f.id === "雇用形態" ? (
+                                                        <>
+                                                            <option value="正社員">正社員</option>
+                                                            <option value="契約">契約社員</option>
+                                                            <option value="派遣">派遣社員</option>
+                                                            <option value="パート">パート・アルバイト</option>
+                                                        </>
+                                                    ) : f.id === "変動・固定" ? (
+                                                        <>
+                                                            <option value="変動">変動金利</option>
+                                                            <option value="固定">固定金利</option>
+                                                        </>
+                                                    ) : (
+                                                        f.options?.map((opt) => (
+                                                            <option key={opt} value={opt}>
+                                                                {opt}
+                                                            </option>
+                                                        ))
+                                                    )}
+                                                </select>
+                                            ) : f.type === "checkbox" ? (
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Boolean(values[f.id])}
+                                                        onChange={(e) => handleChange(f.id, e.target.checked)}
+                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-slate-600 dark:text-slate-400">適用する</span>
+                                                </label>
+                                            ) : f.id === "総額表示" ? (
+                                                <div className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 min-h-[38px] flex items-center">
+                                                    {values[f.id] ? `${values[f.id]}万円` : "物件価格と諸経費を入力すると自動計算されます"}
+                                                </div>
+                                            ) : f.id === "自己資金額" ? (
+                                                <div className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 min-h-[38px] flex items-center">
+                                                    {values[f.id] ? `${values[f.id]}万円` : "総額と借入希望額を入力すると自動計算されます"}
+                                                </div>
+                                            ) : f.id === "借入希望年数" ? (
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        value={(values[f.id] ?? "") as string}
+                                                        onChange={(e) => handleChange(f.id, e.target.value)}
+                                                        required={!!f.required}
+                                                        placeholder="希望する借入年数を入力"
+                                                        className={`rounded-xl border px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm w-full ${values["_ageWarning"] ? 'border-red-300' : 'border-slate-200'
+                                                            }`}
+                                                    />
+                                                    {values["_ageWarning"] && (
+                                                        <div className="mt-1 text-xs text-red-600 dark:text-red-400">
+                                                            年齢を記入してください
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    inputMode={f.type === "number" ? "numeric" : undefined}
+                                                    value={(values[f.id] ?? "") as string}
+                                                    onChange={(e) => handleChange(f.id, e.target.value)}
+                                                    required={!!f.required}
+                                                    placeholder={f.placeholder ?? (f.type === "number" ? "数字を入力" : "")}
+                                                    className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
                                                 />
-                                                {values["_ageWarning"] && (
-                                                    <div className="mt-1 text-xs text-red-600 dark:text-red-400">
-                                                        年齢を記入してください
-                                                    </div>
-                                                )}
+                                            )}
+
+                                            {f.unit && (
+                                                <span className="text-xs text-gray-500 mt-1">単位: {f.unit}</span>
+                                            )}
+                                        </div>
+
+                                        {/* 🔥 借入名義の直後に合算者項目を動的表示 */}
+                                        {f.id === "借入名義" && loanOwnership && ["ペアローン", "収入合算(連帯債務)", "収入合算(連帯保証)", "婚姻前合算"].includes(loanOwnership) && (
+                                            <div className="ml-4 pl-4 border-l-2 border-purple-300 space-y-4 mt-4">
+                                                <div className="text-sm font-semibold text-purple-700 dark:text-purple-400 mb-2">
+                                                    合算者情報
+                                                </div>
+
+                                                {/* 年収（合算者） */}
+                                                <div className="flex flex-col">
+                                                    <label className="mb-1 font-medium text-sm text-slate-700 dark:text-slate-300">
+                                                        年収（合算者）
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        value={(values["年収_合算者"] || values["年収(合算者)"] || "") as string}
+                                                        onChange={(e) => handleChange("年収_合算者", e.target.value)}
+                                                        placeholder="合算者の年収を入力"
+                                                        className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                                                    />
+                                                </div>
+
+                                                {/* 年齢（合算者） */}
+                                                <div className="flex flex-col">
+                                                    <label className="mb-1 font-medium text-sm text-slate-700 dark:text-slate-300">
+                                                        年齢（合算者）
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        value={(values["年齢_合算者"] || values["年齢(合算者)"] || "") as string}
+                                                        onChange={(e) => handleChange("年齢_合算者", e.target.value)}
+                                                        placeholder="合算者の年齢を入力"
+                                                        className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                                                    />
+                                                </div>
+
+                                                {/* 借入希望年数（合算者） */}
+                                                <div className="flex flex-col">
+                                                    <label className="mb-1 font-medium text-sm text-slate-700 dark:text-slate-300">
+                                                        借入希望年数（合算者）
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        value={(values["借入希望年数_合算者"] || values["借入希望年数(合算者)"] || "") as string}
+                                                        onChange={(e) => handleChange("借入希望年数_合算者", e.target.value)}
+                                                        placeholder="合算者の借入希望年数を入力"
+                                                        className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                                                    />
+                                                </div>
                                             </div>
-                                        ) : (
-                                            <input
-                                                type="text"
-                                                inputMode="numeric"
-                                                value={(values[f.id] ?? "") as string}
-                                                onChange={(e) => handleChange(f.id, e.target.value)}
-                                                required={!!f.required}
-                                                placeholder={f.placeholder ?? "数字を入力"}
-                                                className="rounded-xl border border-slate-200 px-3 py-2 bg-white/90 dark:bg-slate-900/70 dark:border-slate-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
-                                            />
                                         )}
-                                    </div>
+                                    </React.Fragment>
                                 );
                             })}
                         </div>

@@ -93,14 +93,18 @@ const GLOBAL_CSS = `
 // 借入可能額計算結果の型定義
 interface LoanCalculationResult {
     maxLoanAmount: number;
-    monthlyPayment: number;
+    monthlyPayment: number; // 後方互換性のため残す
+    monthlyPaymentFromMax: number; // ①借入可能額からの月返済額（円）
+    monthlyPaymentFromDesired: number | null; // ②借入希望額からの月返済額（円）
     applicableDebtRatio: number;
     calculationDetails: {
         annualIncome: number;
         applicableDebtRatio: number;
         maxAnnualPayment: number;
         screeningRate: number;
+        interestRate: number; // ← 追加
         loanPeriodYears: number;
+        desiredLoanAmount: number | null; // ← 追加
     };
 }
 
@@ -915,6 +919,8 @@ export default function Home() {
                     const params: LoanCalculationParams = {
                         annualIncome: income,
                         screeningRate: loan.screening_rate,
+                        interestRate: loan.interest_rate || 0, // ← 追加
+
                         debtRatio0_399: loan.debt_ratio_0_399,
                         debtRatio400Plus: loan.debt_ratio_400_plus,
                         loanPeriodYears: period,
@@ -1024,13 +1030,17 @@ export default function Home() {
                     combinedCalculationResult = {
                         maxLoanAmount: 0,
                         monthlyPayment: 0,
+                        monthlyPaymentFromMax: 0, // ← 追加
+                        monthlyPaymentFromDesired: null, // ← 追加
                         applicableDebtRatio: 0,
                         calculationDetails: {
                             annualIncome: combinedIncome,
                             applicableDebtRatio: 0,
                             maxAnnualPayment: 0,
                             screeningRate: loan.screening_rate || 0,
-                            loanPeriodYears: period
+                            interestRate: loan.interest_rate || 0, // ← 追加
+                            loanPeriodYears: period,
+                            desiredLoanAmount: null // ← 追加
                         }
                     };
                 } else {
@@ -1054,6 +1064,8 @@ export default function Home() {
                         const combinedParams: LoanCalculationParams = {
                             annualIncome: combinedIncome,
                             screeningRate: loan.screening_rate,
+                            interestRate: loan.interest_rate || 0, // ← 追加
+
                             debtRatio0_399: loan.debt_ratio_0_399,
                             debtRatio400Plus: loan.debt_ratio_400_plus,
                             loanPeriodYears: period,
@@ -1503,12 +1515,12 @@ export default function Home() {
                                                                                     const combinedExceeded = loan.combinedCalculationResult.maxLoanAmount > maxLoanAmountManYen;
 
                                                                                     const mainMonthly = mainExceeded
-                                                                                        ? Math.floor(loan.calculationResult.monthlyPayment * (maxLoanAmountManYen / loan.calculationResult.maxLoanAmount))
-                                                                                        : loan.calculationResult.monthlyPayment;
+                                                                                        ? Math.floor(loan.calculationResult.monthlyPaymentFromMax * (maxLoanAmountManYen / loan.calculationResult.maxLoanAmount))
+                                                                                        : loan.calculationResult.monthlyPaymentFromMax;
 
                                                                                     const combinedMonthly = combinedExceeded
-                                                                                        ? Math.floor(loan.combinedCalculationResult.monthlyPayment * (maxLoanAmountManYen / loan.combinedCalculationResult.maxLoanAmount))
-                                                                                        : loan.combinedCalculationResult.monthlyPayment;
+                                                                                        ? Math.floor(loan.combinedCalculationResult.monthlyPaymentFromMax * (maxLoanAmountManYen / loan.combinedCalculationResult.maxLoanAmount))
+                                                                                        : loan.combinedCalculationResult.monthlyPaymentFromMax;
 
                                                                                     const totalMonthly = mainMonthly + combinedMonthly;
 
@@ -1518,7 +1530,7 @@ export default function Home() {
                                                                                     return `合計月々 ${totalMonthly.toLocaleString()}円`;
                                                                                 } else {
                                                                                     const totalAmount = loan.calculationResult.maxLoanAmount + loan.combinedCalculationResult.maxLoanAmount;
-                                                                                    const totalMonthly = loan.calculationResult.monthlyPayment + loan.combinedCalculationResult.monthlyPayment;
+                                                                                    const totalMonthly = loan.calculationResult.monthlyPaymentFromMax + loan.combinedCalculationResult.monthlyPaymentFromMax;
 
                                                                                     if (maxLoanAmountManYen && totalAmount > maxLoanAmountManYen) {
                                                                                         const ratio = maxLoanAmountManYen / totalAmount;
@@ -1533,20 +1545,20 @@ export default function Home() {
                                                                                 const mainAmount = loan.calculationResult.maxLoanAmount;
                                                                                 if (maxLoanAmountManYen && mainAmount > maxLoanAmountManYen) {
                                                                                     const ratio = maxLoanAmountManYen / mainAmount;
-                                                                                    const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPayment * ratio);
+                                                                                    const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPaymentFromMax  * ratio);
                                                                                     return `月々 ${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                                 }
-                                                                                return `月々 ${loan.calculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                                return `月々 ${loan.calculationResult.monthlyPaymentFromMax .toLocaleString()}円`;
                                                                             }
                                                                             // 合算者のみの場合
                                                                             else if (loan.combinedCalculationResult) {
                                                                                 const combinedAmount = loan.combinedCalculationResult.maxLoanAmount;
                                                                                 if (maxLoanAmountManYen && combinedAmount > maxLoanAmountManYen) {
                                                                                     const ratio = maxLoanAmountManYen / combinedAmount;
-                                                                                    const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPayment * ratio);
+                                                                                    const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPaymentFromMax * ratio);
                                                                                     return `月々 ${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                                 }
-                                                                                return `月々 ${loan.combinedCalculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                                return `月々 ${loan.combinedCalculationResult.monthlyPaymentFromMax.toLocaleString()}円`;
                                                                             }
                                                                             return "-";
                                                                         })()}
@@ -1558,45 +1570,62 @@ export default function Home() {
                                                                     const requestAmount = pick(filters, ["借入希望額（万円）", "借入希望額_万円"]);
                                                                     if (requestAmount && !isNaN(toNumberLike(requestAmount))) {
                                                                         const requestAmountVal = toNumberLike(requestAmount);
-
-                                                                        // 希望額時の返済額を計算（簡易版：比例計算）
-                                                                        let totalPossibleAmount = 0;
-                                                                        let totalPossibleMonthly = 0;
-
-                                                                        if (loan.calculationResult && loan.combinedCalculationResult) {
-                                                                            // 両方ある場合
-                                                                            totalPossibleAmount = loan.calculationResult.maxLoanAmount + loan.combinedCalculationResult.maxLoanAmount;
-                                                                            totalPossibleMonthly = loan.calculationResult.monthlyPayment + loan.combinedCalculationResult.monthlyPayment;
-                                                                        } else if (loan.calculationResult) {
-                                                                            // 主債務者のみ
-                                                                            totalPossibleAmount = loan.calculationResult.maxLoanAmount;
-                                                                            totalPossibleMonthly = loan.calculationResult.monthlyPayment;
-                                                                        } else if (loan.combinedCalculationResult) {
-                                                                            // 合算者のみ
-                                                                            totalPossibleAmount = loan.combinedCalculationResult.maxLoanAmount;
-                                                                            totalPossibleMonthly = loan.combinedCalculationResult.monthlyPayment;
+                                                                        const loanPeriodYears = pick(filters, ["借入期間（年）", "借入期間_年"]) || 35;
+                                                                        const period = toNumberLike(loanPeriodYears);
+                                                                        const loanOwnership = pick(filters, ["借入名義"]);
+                                                                    
+                                                                        // 借入希望額での月々返済額を計算（元利均等返済）
+                                                                        const calculateDesiredMonthly = (amount: number, rate: number, years: number): number => {
+                                                                            const principal = amount * 10000; // 万円→円
+                                                                            const monthlyRate = rate / 100 / 12; // 月利
+                                                                            const totalMonths = years * 12;
+                                                                    
+                                                                            if (monthlyRate === 0) {
+                                                                                return principal / totalMonths;
+                                                                            }
+                                                                    
+                                                                            // 元利均等返済の月返済額
+                                                                            return principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                                                                                   (Math.pow(1 + monthlyRate, totalMonths) - 1);
+                                                                        };
+                                                                    
+                                                                        const interestRate = loan.interest_rate || 0;
+                                                                        let requestMonthly = 0;
+                                                                    
+                                                                        // ペアローンの場合：希望額を2人で分割
+                                                                        if (loanOwnership === "ペアローン" && loan.calculationResult && loan.combinedCalculationResult) {
+                                                                            // 借入可能額の比率で希望額を按分
+                                                                            const mainRatio = loan.calculationResult.maxLoanAmount / 
+                                                                                             (loan.calculationResult.maxLoanAmount + loan.combinedCalculationResult.maxLoanAmount);
+                                                                            const combinedRatio = 1 - mainRatio;
+                                                                    
+                                                                            const mainAmount = requestAmountVal * mainRatio;
+                                                                            const combinedAmount = requestAmountVal * combinedRatio;
+                                                                    
+                                                                            const mainMonthly = calculateDesiredMonthly(mainAmount, interestRate, period);
+                                                                            const combinedMonthly = calculateDesiredMonthly(combinedAmount, interestRate, period);
+                                                                    
+                                                                            requestMonthly = Math.floor(mainMonthly + combinedMonthly);
                                                                         }
-
-                                                                        if (totalPossibleAmount > 0) {
-                                                                            const requestRatio = requestAmountVal / totalPossibleAmount;
-                                                                            const requestMonthly = Math.floor(totalPossibleMonthly * requestRatio);
-
-                                                                            return (
-                                                                                <div>
-                                                                                    <div className="text-xs text-purple-600 dark:text-purple-400 mb-1 font-medium">
-                                                                                        借入希望額
-                                                                                    </div>
-                                                                                    <div className="text-lg font-bold text-purple-800 dark:text-purple-200">
-                                                                                        {formatLoanAmount(requestAmountVal)}
-                                                                                    </div>
-                                                                                    <div className="text-xs text-purple-500 dark:text-purple-300 mt-1">
-                                                                                        希望額時 月々 {requestMonthly.toLocaleString()}円
-                                                                                    </div>
+                                                                        // その他（単独・収入合算など）：希望額全体で計算
+                                                                        else {
+                                                                            requestMonthly = Math.floor(calculateDesiredMonthly(requestAmountVal, interestRate, period));
+                                                                        }
+                                                                    
+                                                                        return (
+                                                                            <div>
+                                                                                <div className="text-xs text-purple-600 dark:text-purple-400 mb-1 font-medium">
+                                                                                    借入希望額
                                                                                 </div>
-                                                                            );
-                                                                        }
+                                                                                <div className="text-lg font-bold text-purple-800 dark:text-purple-200">
+                                                                                    {formatLoanAmount(requestAmountVal)}
+                                                                                </div>
+                                                                                <div className="text-xs text-purple-500 dark:text-purple-300 mt-1">
+                                                                                    希望額時 月々 {requestMonthly.toLocaleString()}円
+                                                                                </div>
+                                                                            </div>
+                                                                        );
                                                                     }
-                                                                    return null;
                                                                 })()}
                                                             </div>
                                                         </div>
@@ -1641,10 +1670,10 @@ export default function Home() {
                                                                             if (maxLoanAmountManYen && mainAmount > maxLoanAmountManYen) {
                                                                                 // 融資上限が適用される場合の月々返済額を計算
                                                                                 const ratio = maxLoanAmountManYen / mainAmount;
-                                                                                const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPayment * ratio);
+                                                                                const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPaymentFromMax* ratio);
                                                                                 return `月々 ${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                             }
-                                                                            return `月々 ${loan.calculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                            return `月々 ${loan.calculationResult.monthlyPaymentFromMax.toLocaleString()}円`;
                                                                         })()}
                                                                     </div>
                                                                 </div>
@@ -1687,10 +1716,10 @@ export default function Home() {
 
                                                                                     if (maxLoanAmountManYen && combinedAmount > maxLoanAmountManYen) {
                                                                                         const ratio = maxLoanAmountManYen / combinedAmount;
-                                                                                        const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPayment * ratio);
+                                                                                        const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPaymentFromMax  * ratio);
                                                                                         return `${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                                     }
-                                                                                    return `${loan.combinedCalculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                                    return `${loan.combinedCalculationResult.monthlyPaymentFromMax.toLocaleString()}円`;
                                                                                 })()}
                                                                             </div>
                                                                         </div>
@@ -1724,10 +1753,10 @@ export default function Home() {
 
                                                                                 if (maxLoanAmountManYen && mainAmount > maxLoanAmountManYen) {
                                                                                     const ratio = maxLoanAmountManYen / mainAmount;
-                                                                                    const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPayment * ratio);
+                                                                                    const adjustedMonthly = Math.floor(loan.calculationResult.monthlyPaymentFromMax  * ratio);
                                                                                     return `月々 ${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                                 }
-                                                                                return `月々 ${loan.calculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                                return `月々 ${loan.calculationResult.monthlyPaymentFromMax .toLocaleString()}円`;
                                                                             })()}
                                                                         </div>
                                                                     </div>
@@ -1767,10 +1796,10 @@ export default function Home() {
 
                                                                                         if (maxLoanAmountManYen && combinedAmount > maxLoanAmountManYen) {
                                                                                             const ratio = maxLoanAmountManYen / combinedAmount;
-                                                                                            const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPayment * ratio);
+                                                                                            const adjustedMonthly = Math.floor(loan.combinedCalculationResult.monthlyPaymentFromMax  * ratio);
                                                                                             return `月々 ${adjustedMonthly.toLocaleString()}円 (上限適用)`;
                                                                                         }
-                                                                                        return `月々 ${loan.combinedCalculationResult.monthlyPayment.toLocaleString()}円`;
+                                                                                        return `月々 ${loan.combinedCalculationResult.monthlyPaymentFromMax .toLocaleString()}円`;
                                                                                     })()}
                                                                                 </div>
                                                                             </div>
@@ -1997,7 +2026,7 @@ export default function Home() {
                                                     <div className="space-y-2 text-xs">
                                                         {loan["general_group_insurance_features"] && (
                                                             <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">一般団信特徴: </span>
+                                                                <span className="font-medium text-slate-700 dark:text-slate-300">一般団信条件: </span>
                                                                 <span className="text-slate-600 dark:text-slate-400">{loan["general_group_insurance_features"]}</span>
                                                             </div>
                                                         )}
@@ -2011,7 +2040,7 @@ export default function Home() {
 
                                                         {loan["cancer_group_insurance_100_notes"] && (
                                                             <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">がん団信備考: </span>
+                                                                <span className="font-medium text-slate-700 dark:text-slate-300">がん団信条件: </span>
                                                                 <span className="text-slate-600 dark:text-slate-400">{loan["cancer_group_insurance_100_notes"]}</span>
                                                             </div>
                                                         )}
