@@ -296,7 +296,7 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
   }) => {
     const displayValue = value === '○' ? '○' : value === '×' ? '×' : value === '△' ? '△' : '-';
     const colorClass = value === '○' ? 'text-green-600' : value === '×' ? 'text-red-600'  : value === '△'
-    ? 'text-orange-500': 'text-slate-400';
+    ? 'text-green-600': 'text-slate-400';
 
     return (
       <div className="grid grid-cols-3 gap-4 py-3 border-b border-slate-200 dark:border-slate-700 last:border-0">
@@ -498,14 +498,14 @@ export default function AdminBankDetailModal({ loan, onClose }: Props) {
                   label="一般団信"
                   value={editedLoan.general_group_insurance}
                   field="general_group_insurance"
-                  note={editedLoan.general_group_insurance_features || '【一般団信】金利上乗せなし_満18歳以上満65歳未満'}
+                  note={editedLoan.general_group_insurance_features || ''}
                   noteField="general_group_insurance_features"
                 />
                 <SymbolRow
                   label="ワイド団信"
                   value={editedLoan.wide_group_insurance}
                   field="wide_group_insurance"
-                  note={editedLoan.wide_group_insurance_conditions || '【ワイド団信】+0.30%_満18歳以上満65歳以下'}
+                  note={editedLoan.wide_group_insurance_conditions || ''}
                   noteField="wide_group_insurance_conditions"
                 />
                 <SymbolRow

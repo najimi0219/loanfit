@@ -13,6 +13,8 @@ import BankDetailModal from "@/components/BankDetailModalUser";
 // import FloatingContactButton from "@/components/FloatingContactButton"; // ← 削除
 import SupportedBy from "@/components/SupportedBy";
 
+const ok = (v: string | null | undefined) => v === "○" || v === "△";
+
 const FloatingContactButton = dynamic(
     () => import("@/components/FloatingContactButton"),
     { ssr: false }
@@ -337,7 +339,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         // 婚姻前フィルターがONの場合は、対応していない銀行を除外
         if (isPreMarriageFilter) {
             const supportsPreMarriage = loan["pre_marriage_consolidation"];
-            if (!supportsPreMarriage || supportsPreMarriage !== "○") {
+            if (!ok(supportsPreMarriage)) {
                 conEmploymentWarning = "婚姻前の融資は未対応の可能性があります。合算者は融資条件を満たしません（婚姻前合算未対応）";
             }
         }
@@ -350,8 +352,9 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         if (!combinedEmploymentWarning) {
             const combinedJibyou = pick(filters, ["持病の有無（合算者）"]);
             if (combinedJibyou) {
-                const supportsWideDanshin = loan["wide_group_insurance"] === "○";
-                const supportsMudanshin = loan["general_insurance_non_participation"] === "○";
+                 const supportsWideDanshin = ok(loan["wide_group_insurance"]);
+
+                const supportsMudanshin = ok(loan["general_insurance_non_participation"] );
 
                 // ワイド団信または無団信のいずれかが○である必要
                 if (!supportsWideDanshin && !supportsMudanshin) {
@@ -367,19 +370,19 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
 
             switch (combinedDanshin) {
                 case "一般団信":
-                    combinedDanshinSupported = loan["general_group_insurance"] === "○";
+                    combinedDanshinSupported =ok( loan["general_group_insurance"] );
                     break;
                 case "がん100":
-                    combinedDanshinSupported = loan["cancer_group_insurance_100"] === "○";
+                    combinedDanshinSupported = ok(loan["cancer_group_insurance_100"]);
                     break;
                 case "3大疾病":
-                    combinedDanshinSupported = loan["three_major_diseases_plus"] === "○";
+                    combinedDanshinSupported = ok(loan["three_major_diseases_plus"] );
                     break;
                 case "無団信":
-                    combinedDanshinSupported = loan["general_insurance_non_participation"] === "○";
+                    combinedDanshinSupported = ok(loan["general_insurance_non_participation"] );
                     break;
                 case "ワイド団信":
-                    combinedDanshinSupported = loan["wide_group_insurance"] === "○";
+                    combinedDanshinSupported = ok(loan["wide_group_insurance"] );
                     break;
                 default:
                     combinedDanshinSupported = true; // 未知の選択肢の場合は通す
@@ -400,8 +403,8 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         if (!combinedEmploymentWarning) {
             const combinedJibyou = pick(filters, ["持病の有無（合算者）"]);
             if (combinedJibyou) {
-                const supportsWideDanshin = loan["wide_group_insurance"] === "○";
-                const supportsMudanshin = loan["general_insurance_non_participation"] === "○";
+                const supportsWideDanshin = ok(loan["wide_group_insurance"]);
+                const supportsMudanshin = ok(loan["general_insurance_non_participation"]);
 
                 // ワイド団信または無団信のいずれかが○である必要
                 if (!supportsWideDanshin && !supportsMudanshin) {
@@ -440,7 +443,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const daihyo = pick(filters, ["代表"]);
         if (daihyo) {
             const supportsDaihyo = loan["representative"];
-            if (!supportsDaihyo || supportsDaihyo !== "○") {
+            if (!ok(supportsDaihyo)) {
                 return null; // 除外対象
             }
         }
@@ -449,7 +452,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const jieigyou = pick(filters, ["自営"]);
         if (jieigyou) {
             const supportsJieigyou = loan["self_employed"];
-            if (!supportsJieigyou || supportsJieigyou !== "○") {
+            if (!ok(supportsJieigyou)) {
                 return null; // 除外対象
             }
         }
@@ -458,7 +461,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const sankyuuikukyu = pick(filters, ["産休育休"]);
         if (sankyuuikukyu) {
             const supportsSankyuuikukyu = loan["maternity_paternity_leave"];
-            if (!supportsSankyuuikukyu || supportsSankyuuikukyu !== "○") {
+            if (!ok(supportsSankyuuikukyu)) {
                 return null; // 除外対象
             }
         }
@@ -467,7 +470,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const shinzokukyojuu = pick(filters, ["親族居住用融資"]);
         if (shinzokukyojuu) {
             const supportsShinzokukyojuu = loan["family_residential_loan"];
-            if (!supportsShinzokukyojuu || supportsShinzokukyojuu !== "○") {
+            if (!ok(supportsShinzokukyojuu)) {
                 return null; // 除外対象
             }
         }
@@ -476,7 +479,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const eijuuken = pick(filters, ["永住権なし"]);
         if (eijuuken) {
             const supportsEijuuken = loan["no_permanent_residency"];
-            if (!supportsEijuuken || supportsEijuuken !== "○") {
+            if (!ok(supportsEijuuken))  {
                 return null; // 除外対象
             }
         }
@@ -485,7 +488,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const lgbtq = pick(filters, ["lgbtq"]);
         if (lgbtq) {
             const supportsLgbtq = loan["lgbtq"];
-            if (!supportsLgbtq || supportsLgbtq !== "○") {
+            if (!ok(supportsLgbtq)) {
                 return null; // 除外対象
             }
         }
@@ -494,7 +497,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const jijitsukon = pick(filters, ["事実婚"]);
         if (jijitsukon) {
             const supportsJijitsukon = loan["common_law_marriage"];
-            if (!supportsJijitsukon || supportsJijitsukon !== "○") {
+            if (!ok(supportsJijitsukon)) {
                 return null; // 除外対象
             }
         }
@@ -503,7 +506,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const shohiyou_roan = pick(filters, ["諸費用込ローン"]);
         if (shohiyou_roan) {
             const supportsShohiyou = loan["various_expenses"];
-            if (!supportsShohiyou || supportsShohiyou !== "○") {
+            if (!ok(supportsShohiyou)) {
                 return null; // 除外対象
             }
         }
@@ -512,7 +515,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const reform = pick(filters, ["リフォーム"]);
         if (reform) {
             const supportsReform = loan["renovation"];
-            if (!supportsReform || supportsReform !== "○") {
+            if (!ok(supportsReform)) {
                 return null; // 除外対象
             }
         }
@@ -521,7 +524,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const kaigae = pick(filters, ["買替（買い先行）"]);
         if (kaigae) {
             const supportsKaigae = loan["property_exchange"];
-            if (!supportsKaigae || supportsKaigae !== "○") {
+            if (!ok(supportsKaigae)) {
                 return null; // 除外対象
             }
         }
@@ -530,7 +533,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const tsunagi = pick(filters, ["つなぎ融資"]);
         if (tsunagi) {
             const supportsTsunagi = loan["bridge_loan"];
-            if (!supportsTsunagi || supportsTsunagi !== "○") {
+            if (!ok(supportsTsunagi)) {
                 return null; // 除外対象
             }
         }
@@ -539,7 +542,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const omatome = pick(filters, ["おまとめローン"]);
         if (omatome) {
             const supportsOmatome = loan["debt_consolidation_loan"];
-            if (!supportsOmatome || supportsOmatome !== "○") {
+            if (!ok(supportsOmatome)){
                 return null; // 除外対象
             }
         }
@@ -548,7 +551,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const saikenchiku_fuka = pick(filters, ["再建築不可"]);
         if (saikenchiku_fuka) {
             const supportsSaikenchiku = loan["non_rebuildable"];
-            if (!supportsSaikenchiku || supportsSaikenchiku !== "○") {
+            if (!ok(supportsSaikenchiku)) {
                 return null; // 除外対象
             }
         }
@@ -557,7 +560,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const shakuchi = pick(filters, ["借地権"]);
         if (shakuchi) {
             const supportsShakuchi = loan["leasehold"];
-            if (!supportsShakuchi || supportsShakuchi !== "○") {
+            if (!ok(supportsShakuchi)) {
                 return null; // 除外対象
             }
         }
@@ -566,7 +569,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const kizon_futekikaku = pick(filters, ["既存不適格"]);
         if (kizon_futekikaku) {
             const supportsKizonFutekikaku = loan["existing_non_conforming"];
-            if (!supportsKizonFutekikaku || supportsKizonFutekikaku !== "○") {
+            if (!ok(supportsKizonFutekikaku)) {
                 return null; // 除外対象
             }
         }
@@ -575,7 +578,7 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         const jishu_kanri = pick(filters, ["自主管理"]);
         if (jishu_kanri) {
             const supportsJishuKanri = loan["self_management"];
-            if (!supportsJishuKanri || supportsJishuKanri !== "○") {
+            if (!ok(supportsJishuKanri)) {
                 return null; // 除外対象
             }
         }
@@ -641,19 +644,19 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
 
             switch (danshin) {
                 case "一般団信":
-                    danshinSupported = loan["general_group_insurance"] === "○";
+                    danshinSupported = ok(loan["general_group_insurance"] );
                     break;
                 case "がん100":
-                    danshinSupported = loan["cancer_group_insurance_100"] === "○";
+                    danshinSupported = ok(loan["cancer_group_insurance_100"] );
                     break;
                 case "3大疾病":
-                    danshinSupported = loan["three_major_diseases_plus"] === "○";
+                    danshinSupported = ok(loan["three_major_diseases_plus"]);
                     break;
                 case "無団信":
-                    danshinSupported = loan["general_insurance_non_participation"] === "○";
+                    danshinSupported = ok(loan["general_insurance_non_participation"] );
                     break;
                 case "ワイド団信":
-                    danshinSupported = loan["wide_group_insurance"] === "○";
+                    danshinSupported =ok( loan["wide_group_insurance"]);
                     break;
                 default:
                     danshinSupported = true; // 未知の選択肢の場合は通す
@@ -668,8 +671,8 @@ function filterLoans(loans: HousingLoan[], filters: Record<string, any>): Housin
         // 持病の有無チェック（ワイド団信または無団信が必要）
         const jibyou = pick(filters, ["持病の有無"]);
         if (jibyou) {
-            const supportsWideDanshin = loan["wide_group_insurance"] === "○";
-            const supportsMudanshin = loan["general_insurance_non_participation"] === "○";
+            const supportsWideDanshin = ok(loan["wide_group_insurance"]);
+            const supportsMudanshin = ok(loan["general_insurance_non_participation"]);
 
             // ワイド団信または無団信のいずれかが○である必要
             if (!supportsWideDanshin && !supportsMudanshin) {
@@ -945,7 +948,7 @@ export default function Home() {
                 // 🔥 修正：借入名義が「婚姻前合算」の場合のみ銀行対応をチェック
                 if (isPreMarriageFilter) {
                     const supportsPreMarriage = loan["pre_marriage_consolidation"];
-                    if (!supportsPreMarriage || supportsPreMarriage !== "○") {
+                    if (!ok(supportsPreMarriage)) {
                         combinedEmploymentValid = false; // 計算を0円にする
                     }
                 }
@@ -956,19 +959,19 @@ export default function Home() {
 
                     switch (combinedDanshin) {
                         case "一般団信":
-                            combinedDanshinSupported = loan["general_group_insurance"] === "○";
+                            combinedDanshinSupported = ok(loan["general_group_insurance"]);
                             break;
                         case "がん100":
-                            combinedDanshinSupported = loan["cancer_group_insurance_100"] === "○";
+                            combinedDanshinSupported = ok(loan["cancer_group_insurance_100"]);
                             break;
                         case "3大疾病":
-                            combinedDanshinSupported = loan["three_major_diseases_plus"] === "○";
+                            combinedDanshinSupported = ok(loan["three_major_diseases_plus"]);
                             break;
                         case "無団信":
-                            combinedDanshinSupported = loan["general_insurance_non_participation"] === "○";
+                            combinedDanshinSupported =ok( loan["general_insurance_non_participation"]);
                             break;
                         case "ワイド団信":
-                            combinedDanshinSupported = loan["wide_group_insurance"] === "○";
+                            combinedDanshinSupported = ok(loan["wide_group_insurance"]);
                             break;
                         default:
                             combinedDanshinSupported = true;
@@ -983,8 +986,8 @@ export default function Home() {
                 if (combinedEmploymentValid) {
                     const combinedJibyou = pick(filters, ["持病の有無（合算者）"]);
                     if (combinedJibyou) {
-                        const supportsWideDanshin = loan["wide_group_insurance"] === "○";
-                        const supportsMudanshin = loan["general_insurance_non_participation"] === "○";
+                        const supportsWideDanshin = ok(loan["wide_group_insurance"]);
+                        const supportsMudanshin = ok(loan["general_insurance_non_participation"]);
 
                         // ワイド団信または無団信のいずれかが○である必要
                         if (!supportsWideDanshin && !supportsMudanshin) {
@@ -1962,28 +1965,28 @@ export default function Home() {
                                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs mb-3">
                                                         <div className="flex items-center gap-1">
                                                             <span className="text-slate-500">一般団信:</span>
-                                                            <span className={`font-medium ${loan.general_group_insurance === '○' ? 'text-green-600' : 'text-slate-400'
+                                                            <span className={`font-medium ${ok(loan.general_group_insurance) ? 'text-green-600' : 'text-slate-400'
                                                                 }`}>
                                                                 {loan.general_group_insurance || '-'}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1">
                                                             <span className="text-slate-500">ワイド団信:</span>
-                                                            <span className={`font-medium ${loan.wide_group_insurance === '○' ? 'text-green-600' : 'text-slate-400'
+                                                            <span className={`font-medium ${ok(loan.wide_group_insurance) ? 'text-green-600' : 'text-slate-400'
                                                                 }`}>
                                                                 {loan.wide_group_insurance || '-'}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1">
                                                             <span className="text-slate-500">がん団信:</span>
-                                                            <span className={`font-medium ${loan.cancer_group_insurance_100 === '○' ? 'text-green-600' : 'text-slate-400'
+                                                            <span className={`font-medium ${ok(loan.cancer_group_insurance_100) ? 'text-green-600' : 'text-slate-400'
                                                                 }`}>
                                                                 {loan.cancer_group_insurance_100 || '-'}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1">
                                                             <span className="text-slate-500">三大疾病:</span>
-                                                            <span className={`font-medium ${loan.three_major_diseases_plus === '○' ? 'text-green-600' : 'text-slate-400'
+                                                            <span className={`font-medium ${ok(loan.three_major_diseases_plus) ? 'text-green-600' : 'text-slate-400'
                                                                 }`}>
                                                                 {loan.three_major_diseases_plus || '-'}
                                                             </span>

@@ -19,6 +19,9 @@ type HousingLoan = {
     wide_group_insurance: string | null;
     cancer_group_insurance_100: string | null;
     three_major_diseases_plus: string | null;
+    /** ▼ 追加：三大疾病の備考テキスト（カラム名はDBに合わせて変更OK） */
+    three_major_diseases_plus_notes?: string | null;
+
     features: string | null;
     created_at: string;
     calculationResult?: {
@@ -39,6 +42,26 @@ interface BankDetailModalProps {
     loan: HousingLoan | null;
     onClose: () => void;
 }
+
+/** ○/△/その他 の丸バッジ用ユーティリティ */
+const statusBadgeClasses = (
+    value: string | null | undefined,
+    size: "lg" | "sm" = "sm"
+) => {
+    const base =
+        `${size === "lg" ? "w-12 h-12 text-lg" : "w-8 h-8 text-sm"} ` +
+        "mx-auto rounded-full flex items-center justify-center font-bold";
+    if (value === "○") {
+        return `${base} bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400`;
+    }
+    if (value === "△") {
+        return `${base} bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400`;
+    }
+    return `${base} bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600`;
+};
+
+/** ○/△ を “対応あり” として扱う判定 */
+const isSupported = (v: string | null | undefined) => ["○", "△"].includes(v ?? "");
 
 export default function BankDetailModal({ loan, onClose }: BankDetailModalProps) {
     // ESCキーでモーダルを閉じる
@@ -125,8 +148,8 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     <div className="flex justify-between items-center">
                                         <span className="text-slate-600 dark:text-slate-400">金利タイプ</span>
                                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${loan.interest_type === '変動'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                                             }`}>
                                             {loan.interest_type || '-'}
                                         </span>
@@ -137,12 +160,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                             {formatRate(loan.interest_rate)}
                                         </span>
                                     </div>
-                                    {/*<div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center">
                                         <span className="text-slate-600 dark:text-slate-400">審査金利</span>
                                         <span className="font-medium text-slate-900 dark:text-slate-100">
                                             {formatRate(loan.screening_rate)}
                                         </span>
-                                    </div>*/}
+                                    </div>
                                 </div>
                             </div>
 
@@ -173,7 +196,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
-                                        {/*<span className="text-slate-600 dark:text-slate-400">事務手数料</span>*/}
+                                        <span className="text-slate-600 dark:text-slate-400">事務手数料</span>
                                         <span className="font-medium">
                                             {(loan as any).administrative_fee || '-'}
                                         </span>
@@ -205,18 +228,18 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                             {loan.calculationResult.monthlyPayment.toLocaleString()}円
                                         </div>
                                     </div>
-                                    {/*<div className="text-center">
-                                        } <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">適用返済比率</div> 
+                                    <div className="text-center">
+                                        <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">適用返済比率</div>
                                         <div className="text-xl font-semibold text-slate-700 dark:text-slate-300">
                                             {loan.calculationResult.applicableDebtRatio}%
                                         </div>
-                                    </div>*/}
+                                    </div>
                                 </div>
 
                                 <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                                     <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
                                         <div>・年収: {loan.calculationResult.calculationDetails.annualIncome}万円</div>
-                                        {/*<div>・審査金利: {loan.calculationResult.calculationDetails.screeningRate}%</div>*/}
+                                        <div>・審査金利: {loan.calculationResult.calculationDetails.screeningRate}%</div>
                                         <div>・借入期間: {loan.calculationResult.calculationDetails.loanPeriodYears}年</div>
                                     </div>
                                 </div>
@@ -224,7 +247,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                         </section>
                     )}
 
-                    {/* 返済比率 
+                    {/* 返済比率 */}
                     <section>
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
                             <div className="w-1 h-6 bg-purple-500 rounded"></div>
@@ -245,7 +268,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                 </div>
                             </div>
                         </div>
-                    </section>*/}
+                    </section>
 
                     {/* 団体信用生命保険 */}
                     <section>
@@ -263,10 +286,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                             ].map((item, index) => (
                                 <div key={index} className="text-center">
                                     <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                    <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${item.value === '○'
-                                        ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                        : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                        }`}>
+                                    <div className={statusBadgeClasses(item.value, "lg")}>
                                         {item.value || '-'}
                                     </div>
                                 </div>
@@ -276,7 +296,8 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                         {/* 備考・特徴があれば表示 */}
                         {((loan as any).general_group_insurance_features ||
                             (loan as any).wide_group_insurance_conditions ||
-                            (loan as any).cancer_group_insurance_100_notes) && (
+                            (loan as any).cancer_group_insurance_100_notes ||
+                            (loan as any).three_major_diseases_plus_notes) && (
                                 <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
                                     <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-3">備考・特徴</h4>
                                     <div className="space-y-3 text-sm">
@@ -296,6 +317,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                             <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border-l-4 border-red-400">
                                                 <div className="font-medium text-red-700 dark:text-red-300 mb-1">がん団信100 備考</div>
                                                 <div className="text-slate-700 dark:text-slate-300">{(loan as any).cancer_group_insurance_100_notes}</div>
+                                            </div>
+                                        )}
+                                        {(loan as any).three_major_diseases_plus_notes && (
+                                            <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border-l-4 border-purple-400">
+                                                <div className="font-medium text-purple-700 dark:text-purple-300 mb-1">三大疾病 備考</div>
+                                                <div className="text-slate-700 dark:text-slate-300">{(loan as any).three_major_diseases_plus_notes}</div>
                                             </div>
                                         )}
                                     </div>
@@ -325,9 +352,9 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                             <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                                                 {item.months ? `${item.months}ヶ月` : '-'}
                                             </div>
-                                            {/*{item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -344,15 +371,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     ].map((item, index) => (
                                         <div key={index} className="text-center">
                                             <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold ${item.value === '○'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                                }`}>
+                                            <div className={statusBadgeClasses(item.value, "sm")}>
                                                 {item.value || '-'}
                                             </div>
-                                            {/*{item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -372,15 +396,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     ].map((item, index) => (
                                         <div key={index} className="text-center">
                                             <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold ${item.value === '○'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                                }`}>
+                                            <div className={statusBadgeClasses(item.value, "sm")}>
                                                 {item.value || '-'}
                                             </div>
-                                            {/*{item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -398,15 +419,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     ].map((item, index) => (
                                         <div key={index} className="text-center">
                                             <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold ${item.value === '○'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                                }`}>
+                                            <div className={statusBadgeClasses(item.value, "sm")}>
                                                 {item.value || '-'}
                                             </div>
-                                            {/*{item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -416,9 +434,9 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                             <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6">
                                 <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-4">物件制限</h4>
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-slate-600 dark:text-slate-400 whitespace-nowrap">MS面積制限</span>
-                                        <span className="font-medium text-slate-900 dark:text-slate-100">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-600 dark:text-slate-400">MS面積制限</span>
+                                        <span className="font-medium">
                                             {(loan as any).ms_area_limit_sqm ? `${(loan as any).ms_area_limit_sqm}㎡` : '-'}
                                         </span>
                                     </div>
@@ -435,15 +453,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     ].map((item, index) => (
                                         <div key={index} className="text-center">
                                             <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold ${item.value === '○'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                                }`}>
+                                            <div className={statusBadgeClasses(item.value, "sm")}>
                                                 {item.value || '-'}
                                             </div>
-                                            {/*{item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -463,15 +478,12 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                     ].map((item, index) => (
                                         <div key={index} className="text-center">
                                             <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</div>
-                                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold ${item.value === '○'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
-                                                }`}>
+                                            <div className={statusBadgeClasses(item.value, "sm")}>
                                                 {item.value || '-'}
                                             </div>
-                                            {/* {item.notes && (
+                                            {item.notes && (
                                                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</div>
-                                            )}*/}
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -496,7 +508,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                         </section>
                     )}
 
-                    {/* 特徴 
+                    {/* 特徴 */}
                     {loan.features && (
                         <section>
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
@@ -510,7 +522,7 @@ export default function BankDetailModal({ loan, onClose }: BankDetailModalProps)
                                 </p>
                             </div>
                         </section>
-                    )}*/}
+                    )}
                 </div>
             </div>
         </div>
