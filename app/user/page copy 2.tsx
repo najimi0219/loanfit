@@ -1570,23 +1570,9 @@ export default function Home() {
                                                                     const requestAmount = pick(filters, ["借入希望額（万円）", "借入希望額_万円"]);
                                                                     if (requestAmount && !isNaN(toNumberLike(requestAmount))) {
                                                                         const requestAmountVal = toNumberLike(requestAmount);
+                                                                        const loanPeriodYears = pick(filters, ["借入期間（年）", "借入期間_年"]) || 35;
+                                                                        const period = toNumberLike(loanPeriodYears);
                                                                         const loanOwnership = pick(filters, ["借入名義"]);
-                                                                    
-                                                                        // 実際に計算に使用された借入期間を取得
-                                                                        let actualPeriod = 35; // デフォルト
-                                                                    
-                                                                        if (loanOwnership === "ペアローン" && loan.calculationResult && loan.combinedCalculationResult) {
-                                                                            // ペアローンの場合は短い方の期間を使用
-                                                                            const mainPeriod = loan.calculationResult.calculationDetails.loanPeriodYears;
-                                                                            const combinedPeriod = loan.combinedCalculationResult.calculationDetails.loanPeriodYears;
-                                                                            actualPeriod = Math.min(mainPeriod, combinedPeriod);
-                                                                        } else if (loan.calculationResult) {
-                                                                            // 単独または主債務者の期間を使用
-                                                                            actualPeriod = loan.calculationResult.calculationDetails.loanPeriodYears;
-                                                                        } else if (loan.combinedCalculationResult) {
-                                                                            // 合算者のみの場合
-                                                                            actualPeriod = loan.combinedCalculationResult.calculationDetails.loanPeriodYears;
-                                                                        }
                                                                     
                                                                         // 借入希望額での月々返済額を計算（元利均等返済）
                                                                         const calculateDesiredMonthly = (amount: number, rate: number, years: number): number => {
@@ -1616,14 +1602,14 @@ export default function Home() {
                                                                             const mainAmount = requestAmountVal * mainRatio;
                                                                             const combinedAmount = requestAmountVal * combinedRatio;
                                                                     
-                                                                            const mainMonthly = calculateDesiredMonthly(mainAmount, interestRate, actualPeriod);
-                                                                            const combinedMonthly = calculateDesiredMonthly(combinedAmount, interestRate, actualPeriod);
+                                                                            const mainMonthly = calculateDesiredMonthly(mainAmount, interestRate, period);
+                                                                            const combinedMonthly = calculateDesiredMonthly(combinedAmount, interestRate, period);
                                                                     
                                                                             requestMonthly = Math.floor(mainMonthly + combinedMonthly);
                                                                         }
                                                                         // その他（単独・収入合算など）：希望額全体で計算
                                                                         else {
-                                                                            requestMonthly = Math.floor(calculateDesiredMonthly(requestAmountVal, interestRate, actualPeriod));
+                                                                            requestMonthly = Math.floor(calculateDesiredMonthly(requestAmountVal, interestRate, period));
                                                                         }
                                                                     
                                                                         return (
