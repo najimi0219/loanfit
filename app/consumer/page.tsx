@@ -1202,6 +1202,13 @@ export default function Home() {
         return `${manYen.toLocaleString()}万円`;
     };
 
+    // 一般ユーザー向け：年収・年齢が未入力のうちは結果一覧を表示しない
+    const incomeInput = pick(filters, ["年収（万円）", "年収_万円", "incomeSelf"]);
+    const ageInput = pick(filters, ["年齢"]);
+    const hasRequiredInput =
+        incomeInput != null && String(incomeInput).trim() !== "" &&
+        ageInput != null && String(ageInput).trim() !== "";
+
     return (
         <div className="min-h-screen gradient-hero bg-grid">
             <style>{GLOBAL_CSS}</style>
@@ -1292,7 +1299,11 @@ export default function Home() {
                         {/* フィルター結果統計 */}
                         <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                             <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                                {loading ? "読み込み中..." : (
+                                {loading ? "読み込み中..." : !hasRequiredInput ? (
+                                    <div className="text-xs">
+                                        年収と年齢を入力してください
+                                    </div>
+                                ) : (
                                     <div>
                                         <div className="font-medium text-slate-800 dark:text-slate-200">
                                             {filteredLoansWithCalculation.length} / {allLoans.length} 件
@@ -1337,7 +1348,17 @@ export default function Home() {
                     {/* 住宅ローン商品一覧 */}
                     {!loading && !error && (
                         <>
-                            {filteredLoansWithCalculation.length === 0 ? (
+                            {!hasRequiredInput ? (
+                                <div className="glass rounded-xl p-8 text-center">
+                                    <div className="text-slate-400 mb-2">
+                                        <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-slate-600 mb-2">年収と年齢を入力してください</p>
+                                    <p className="text-sm text-slate-500">入力すると、条件に合う住宅ローンの候補が表示されます</p>
+                                </div>
+                            ) : filteredLoansWithCalculation.length === 0 ? (
                                 <div className="glass rounded-xl p-8 text-center">
                                     <div className="text-slate-400 mb-2">
                                         <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1356,9 +1377,9 @@ export default function Home() {
                                             onClick={() => {
                                                 console.log('🔥 Card clicked!');
                                                 console.log('🔥 loan.id:', loan.id);
-                                                console.log('🔥 loan.bank_name:', loan.bank_name);
+                                                
 
-                                                setSelectedLoan(loan);
+                                                setSelectedLoan({ ...loan, bank_name: bankAlias(index) });
                                                 setSelectedBankId(loan.id);
 
                                                 console.log('🔥 After setState called');
