@@ -911,6 +911,7 @@ export default function Home() {
                     const params: LoanCalculationParams = {
                         annualIncome: income,
                         screeningRate: loan.screening_rate,
+                        interestRate: loan.interest_rate ?? 0,
                         debtRatio0_399: loan.debt_ratio_0_399,
                         debtRatio400Plus: loan.debt_ratio_400_plus,
                         loanPeriodYears: period,
@@ -1050,6 +1051,7 @@ export default function Home() {
                         const combinedParams: LoanCalculationParams = {
                             annualIncome: combinedIncome,
                             screeningRate: loan.screening_rate,
+                            interestRate: loan.interest_rate ?? 0,
                             debtRatio0_399: loan.debt_ratio_0_399,
                             debtRatio400Plus: loan.debt_ratio_400_plus,
                             loanPeriodYears: period,
