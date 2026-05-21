@@ -15,6 +15,13 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // ------------------------
+  // /consumer 配下は一般ユーザー向けの公開ページ（認証不要）
+  // ------------------------
+  if (pathname === "/consumer" || pathname.startsWith("/consumer/")) {
+    return NextResponse.next();
+  }
+
   const authedRoot = req.cookies.get("auth_root")?.value === "1";
   const authedUser = req.cookies.get("auth_user")?.value === "1";
   const authedAdmin = req.cookies.get("auth_admin")?.value === "1";

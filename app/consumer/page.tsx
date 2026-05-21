@@ -1,11 +1,10 @@
 "use client";
-{/*vivala　page*/}
+{/*vivala　page*/ }
 
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import PasswordScreen from "@/components/PasswordScreen"; // ← 追加
 import SearchForm from "@/components/SearchFormUser";
 import { calculateMaxLoanAmount, formatLoanAmount } from "@/lib/loanCalculator";
 import type { LoanCalculationParams } from "@/lib/loanCalculator";
@@ -14,10 +13,21 @@ import SupportedBy from "@/components/SupportedBy";
 
 
 const FloatingContactButton = dynamic(
-  () => import("@/components/FloatingContactButton"),
-  { ssr: false }
+    () => import("@/components/FloatingContactButton"),
+    { ssr: false }
 );
 
+
+/* 一般ユーザー向け：検索結果の銀行名を表示順に匿名化（A銀行・B銀行…） */
+function bankAlias(index: number): string {
+  let n = index;
+  let label = "";
+  do {
+    label = String.fromCharCode(65 + (n % 26)) + label;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return `${label}銀行`;
+}
 
 /* ------- Global cosmetic (前と同じ雰囲気) ------- */
 const GLOBAL_CSS = `
@@ -800,11 +810,10 @@ export default function Home() {
         console.log('✅ selectedBankId changed to:', selectedBankId);
     }, [selectedBankId]);
     const [clearTrigger, setClearTrigger] = useState(0); // 追加
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-  
+
 
     // 全ての住宅ローンデータを取得
     useEffect(() => {
@@ -1159,9 +1168,8 @@ export default function Home() {
         return filteredResult;
     }, [allLoans, filters]);
 
-    if (!isAuthenticated) {
-        return <PasswordScreen onAuthenticated={() => setIsAuthenticated(true)} />;
-    }
+   
+
 
     // フィルター更新ハンドラ
     const handleFilterChange = (newFilters: Record<string, any>) => {
@@ -1341,7 +1349,7 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {filteredLoansWithCalculation.map((loan) => (
+                                    {filteredLoansWithCalculation.map((loan, index) => (
                                         <article
                                             key={loan.id}
                                             className="glass rounded-xl p-6 card-hover cursor-pointer"
@@ -1361,7 +1369,7 @@ export default function Home() {
                                                 {/* 銀行名と基本情報 */}
                                                 <div className="md:col-span-2">
                                                     <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                                                        {loan.bank_name}
+                                                        {bankAlias(index)}
                                                     </h3>
 
                                                     <div className="flex items-center gap-3 mb-3">

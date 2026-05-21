@@ -8,7 +8,7 @@ const CONTACT = {
   orgLabel: "LoanFit運営",
   company: "Vivalapartner株式会社",
   person: "清水",
-  tel: "090-7214-2300",
+  tel: "050-6883-9270",
   lineId: "shimizu@vivala",
   lineUrl: "https://works.do/G5BUG7i",
   lineQrSrc: "/line-qr.png",
