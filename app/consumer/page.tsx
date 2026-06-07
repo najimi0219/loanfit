@@ -1309,10 +1309,10 @@ export default function Home() {
                                 ) : (
                                     <div>
                                         <div className="font-medium text-slate-800 dark:text-slate-200">
-                                            {filteredLoansWithCalculation.length} / {allLoans.length} 件
+                                            上位 {Math.min(filteredLoansWithCalculation.length, 10)} 件 / {allLoans.length} 件
                                         </div>
                                         <div className="text-xs mt-1">
-                                            条件に一致する銀行
+                                            条件に一致する銀行（上位10件まで表示）
                                         </div>
                                     </div>
                                 )}
@@ -1373,7 +1373,7 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {filteredLoansWithCalculation.map((loan, index) => (
+                                    {filteredLoansWithCalculation.slice(0, 10).map((loan, index) => (
                                         <article
                                             key={loan.id}
                                             className="glass rounded-xl p-6"
