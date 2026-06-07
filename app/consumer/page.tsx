@@ -1229,7 +1229,7 @@ export default function Home() {
                                     <span className="brand-text">LoanFit</span>
                                 </h1>
                                 <div className="-mt-1">
-                                    <SupportedBy label="by" />
+                                    <SupportedBy label="by" brand="ゼロチェック" />
                                 </div>
                             </div>
 
@@ -1296,6 +1296,7 @@ export default function Home() {
                             key={clearTrigger}
                             onSubmit={handleFilterChange}
                             realTime={true}
+                            hideAdvanced={true}
                         />
 
                         {/* フィルター結果統計 */}
@@ -1375,17 +1376,7 @@ export default function Home() {
                                     {filteredLoansWithCalculation.map((loan, index) => (
                                         <article
                                             key={loan.id}
-                                            className="glass rounded-xl p-6 card-hover cursor-pointer"
-                                            onClick={() => {
-                                                console.log('🔥 Card clicked!');
-                                                console.log('🔥 loan.id:', loan.id);
-                                                
-
-                                                setSelectedLoan({ ...loan, bank_name: bankAlias(index) });
-                                                setSelectedBankId(loan.id);
-
-                                                console.log('🔥 After setState called');
-                                            }}
+                                            className="glass rounded-xl p-6"
                                         >
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
@@ -1402,11 +1393,7 @@ export default function Home() {
                                                                 {loan.interest_type}金利
                                                             </span>
                                                         )}
-                                                        {loan.preliminary_screening_method && (
-                                                            <span className="pill">
-                                                                {loan.preliminary_screening_method}審査
-                                                            </span>
-                                                        )}
+                                                        {/* 審査方法はカスタマーページでは非表示 */}
                                                     </div>
                                                     {/* 最低年収警告メッセージ */}
                                                     {(loan as any).incomeWarning && (
@@ -1832,231 +1819,6 @@ export default function Home() {
                                                         </div>
                                                     )}
                                                 </div>
-
-                                                {/* 条件詳細 */}
-                                                <div className="space-y-2 text-sm">
-                                                    {/* 既存の条件表示 */}
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-500">最低年収:</span>
-                                                        <span className="font-medium">
-                                                            {loan.min_annual_income_man_yen ? `${loan.min_annual_income_man_yen}万円` : '-'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-500">融資上限:</span>
-                                                        <span className="font-medium">
-                                                            {formatCurrency(loan.max_loan_amount)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-500">完済年齢:</span>
-                                                        <span className="font-medium">
-                                                            {loan.max_repayment_age ? `${loan.max_repayment_age}歳` : '-'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-500">最長期間:</span>
-                                                        <span className="font-medium">
-                                                            {loan.max_loan_period_years ? `${loan.max_loan_period_years}年` : '-'}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* 主債務者の借り入れ可能年数表示 */}
-                                                    {(() => {
-                                                        const age = toNumberLike(pick(filters, ["年齢"]));
-
-                                                        if (age && !isNaN(age) && loan.max_repayment_age && loan.max_loan_period_years) {
-                                                            const maxPossibleYears = loan.max_repayment_age - age;
-                                                            const availableYears = Math.min(loan.max_loan_period_years, maxPossibleYears);
-
-                                                            return (
-                                                                <div className="flex justify-between">
-                                                                    <span className="text-slate-500">借入可能年数（主）:</span>
-                                                                    <span className={`font-medium ${availableYears > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                                        {availableYears > 0 ? `${availableYears}年` : '借入不可'}
-                                                                    </span>
-                                                                </div>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })()}
-
-                                                    {/* 合算者の借り入れ可能年数表示 */}
-                                                    {(() => {
-                                                        const loanOwnership = pick(filters, ["借入名義"]);
-                                                        let combinedAge;
-
-                                                        // 収入合算（連帯債務・連帯保証）の場合は主債務者の年齢を使用
-                                                        if (loanOwnership === "収入合算(連帯債務)" || loanOwnership === "収入合算(連帯保証)") {
-                                                            combinedAge = toNumberLike(pick(filters, ["年齢"]));
-                                                        } else {
-                                                            combinedAge = toNumberLike(pick(filters, ["年齢_合算者", "年齢（合算者）"]));
-                                                        }
-
-                                                        if (combinedAge && !isNaN(combinedAge) && loan.max_repayment_age && loan.max_loan_period_years) {
-                                                            const maxPossibleYears = loan.max_repayment_age - combinedAge;
-                                                            const availableYears = Math.min(loan.max_loan_period_years, maxPossibleYears);
-
-                                                            return (
-                                                                <div className="flex justify-between">
-                                                                    <span className="text-slate-500">借入可能年数（合算）:</span>
-                                                                    <span className={`font-medium ${availableYears > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                                        {availableYears > 0 ? `${availableYears}年` : '借入不可'}
-                                                                    </span>
-                                                                </div>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })()}
-
-                                                    {/* 借入希望年数の警告表示（主債務者） */}
-                                                    {(() => {
-                                                        const age = toNumberLike(pick(filters, ["年齢"]));
-                                                        const requestedYears = toNumberLike(pick(filters, ["借入希望年数"]));
-
-                                                        if (age && requestedYears && !isNaN(age) && !isNaN(requestedYears) &&
-                                                            loan.max_repayment_age && loan.max_loan_period_years) {
-                                                            const maxPossibleYears = loan.max_repayment_age - age;
-                                                            const availableYears = Math.min(loan.max_loan_period_years, maxPossibleYears);
-
-                                                            if (requestedYears > availableYears) {
-                                                                return (
-                                                                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                                                                        <div className="text-xs text-red-600 dark:text-red-400 font-medium">
-                                                                            ⚠ 希望年数の借入ができません（主債務者）
-                                                                        </div>
-                                                                        <div className="text-xs text-red-500 dark:text-red-300 mt-1">
-                                                                            最大{availableYears}年まで可能
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        }
-                                                        return null;
-                                                    })()}
-
-                                                    {/* 借入希望年数の警告表示（合算者） */}
-                                                    {(() => {
-                                                        const loanOwnership = pick(filters, ["借入名義"]);
-                                                        let combinedAge;
-
-                                                        // 収入合算（連帯債務・連帯保証）の場合は主債務者の年齢を使用
-                                                        if (loanOwnership === "収入合算(連帯債務)" || loanOwnership === "収入合算(連帯保証)") {
-                                                            combinedAge = toNumberLike(pick(filters, ["年齢"]));
-                                                        } else {
-                                                            combinedAge = toNumberLike(pick(filters, ["年齢_合算者", "年齢（合算者）"]));
-                                                        }
-
-                                                        const requestedYears = toNumberLike(pick(filters, ["借入希望年数"]));
-
-                                                        if (combinedAge && requestedYears && !isNaN(combinedAge) && !isNaN(requestedYears) &&
-                                                            loan.max_repayment_age && loan.max_loan_period_years) {
-                                                            const maxPossibleYears = loan.max_repayment_age - combinedAge;
-                                                            const availableYears = Math.min(loan.max_loan_period_years, maxPossibleYears);
-
-                                                            if (requestedYears > availableYears) {
-                                                                return (
-                                                                    <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                                                        <div className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                                                                            ⚠ 希望年数の借入ができません（合算者）
-                                                                        </div>
-                                                                        <div className="text-xs text-yellow-500 dark:text-yellow-300 mt-1">
-                                                                            最大{availableYears}年まで可能
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        }
-                                                        return null;
-                                                    })()}
-
-                                                    {/* 返済比率情報 
-                                                    {(loan.calculationResult || loan.combinedCalculationResult) && (
-                                                        <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                                                            {loan.calculationResult && (
-                                                                <div className="flex justify-between text-xs mb-1">
-                                                                    <span className="text-slate-500">適用返済比率（主）:</span>
-                                                                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                                                                        {loan.calculationResult.applicableDebtRatio}%
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            {loan.combinedCalculationResult && (
-                                                                <div className="flex justify-between text-xs">
-                                                                    <span className="text-slate-500">適用返済比率（合算）:</span>
-                                                                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                                                                        {loan.combinedCalculationResult.applicableDebtRatio}%
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}*/}
-                                                </div>
-
-                                                {/* 団信情報 */}
-                                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 md:col-span-4">
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs mb-3">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-slate-500">一般団信:</span>
-                                                            <span className={`font-medium ${loan.general_group_insurance === '○' ? 'text-green-600' : 'text-slate-400'
-                                                                }`}>
-                                                                {loan.general_group_insurance || '-'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-slate-500">ワイド団信:</span>
-                                                            <span className={`font-medium ${loan.wide_group_insurance === '○' ? 'text-green-600' : 'text-slate-400'
-                                                                }`}>
-                                                                {loan.wide_group_insurance || '-'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-slate-500">がん団信:</span>
-                                                            <span className={`font-medium ${loan.cancer_group_insurance_100 === '○' ? 'text-green-600' : 'text-slate-400'
-                                                                }`}>
-                                                                {loan.cancer_group_insurance_100 || '-'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-slate-500">三大疾病:</span>
-                                                            <span className={`font-medium ${loan.three_major_diseases_plus === '○' ? 'text-green-600' : 'text-slate-400'
-                                                                }`}>
-                                                                {loan.three_major_diseases_plus || '-'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* 団信詳細情報 */}
-                                                    <div className="space-y-2 text-xs">
-                                                        {loan["general_group_insurance_features"] && (
-                                                            <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">一般団信特徴: </span>
-                                                                <span className="text-slate-600 dark:text-slate-400">{loan["general_group_insurance_features"]}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {loan["wide_group_insurance_conditions"] && (
-                                                            <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">ワイド団信条件: </span>
-                                                                <span className="text-slate-600 dark:text-slate-400">{loan["wide_group_insurance_conditions"]}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {loan["cancer_group_insurance_100_notes"] && (
-                                                            <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">がん団信備考: </span>
-                                                                <span className="text-slate-600 dark:text-slate-400">{loan["cancer_group_insurance_100_notes"]}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {loan["three_major_diseases_plus_conditions"] && (
-                                                            <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded">
-                                                                <span className="font-medium text-slate-700 dark:text-slate-300">三大疾病条件: </span>
-                                                                <span className="text-slate-600 dark:text-slate-400">{loan["three_major_diseases_plus_conditions"]}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
                                             </div>
                                         </article>
                                     ))}
@@ -2070,19 +1832,9 @@ export default function Home() {
             </main>
 
 
-
-
-            {/* 銀行詳細モーダル */}
-            <BankDetailModal
-                loan={selectedLoan}
-                onClose={() => {
-                    setSelectedLoan(null);
-                    setSelectedBankId(null); // ボタンも同時に非表示
-                }}
-            />
+            {/* 銀行詳細モーダルはカスタマーページでは非表示 */}
         </div>
 
     );
 
 }
-

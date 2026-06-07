@@ -21,10 +21,12 @@ type Field = {
 
 export default function SearchForm({
     onSubmit,
-    realTime = false
+    realTime = false,
+    hideAdvanced = false
 }: {
     onSubmit: (values: Record<string, any>) => void;
     realTime?: boolean;
+    hideAdvanced?: boolean;
 }) {
     const [values, setValues] = useState<Record<string, any>>({});
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -289,6 +291,7 @@ export default function SearchForm({
 
 
                 {/* 詳細条件セクション */}
+                {!hideAdvanced && (
                 <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <button
                         type="button"
@@ -355,8 +358,9 @@ export default function SearchForm({
                         </div>
                     )}
                 </div>
+                )}
 
-               
+
                 {!realTime && (
                     <button
                         type="submit"

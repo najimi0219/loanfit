@@ -11,10 +11,23 @@ const COLORS = {
 type Props = {
   label?: string;
   href?: string;
+  brand?: string;
 };
 
-export default function SupportedBy({ label = "by", href }: Props) {
-  const Brand = (
+export default function SupportedBy({ label = "by", href, brand }: Props) {
+  const Brand = brand ? (
+    <span
+      className="font-bold tracking-wide"
+      style={{
+        textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 8px rgba(255,255,255,0.8)',
+        color: COLORS.blue,
+      }}
+      aria-label={brand}
+      title={brand}
+    >
+      {brand}
+    </span>
+  ) : (
     <span
       className="font-bold tracking-wide"
       style={{
