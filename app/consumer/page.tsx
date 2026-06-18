@@ -18,15 +18,31 @@ const FloatingContactButton = dynamic(
 );
 
 
-/* 一般ユーザー向け：検索結果の銀行名を表示順に匿名化（A銀行・B銀行…） */
-function bankAlias(index: number): string {
+/* 一般ユーザー向け：A/B/C... の連番 */
+function indexToLetter(index: number): string {
   let n = index;
   let label = "";
   do {
     label = String.fromCharCode(65 + (n % 26)) + label;
     n = Math.floor(n / 26) - 1;
   } while (n >= 0);
-  return `${label}銀行`;
+  return label;
+}
+
+/* 銀行種別ごとに A/B/C... を割り振る匿名化ラベルを生成 */
+function buildBankLabels(
+  loans: { id: string | number; bank_type?: string | null }[]
+): Map<string | number, string> {
+  const counters = new Map<string, number>();
+  const labels = new Map<string | number, string>();
+  for (const loan of loans) {
+    const rawType = (loan.bank_type ?? "").trim();
+    const type = rawType !== "" ? rawType : "その他";
+    const n = counters.get(type) ?? 0;
+    counters.set(type, n + 1);
+    labels.set(loan.id, `${type}${indexToLetter(n)}`);
+  }
+  return labels;
 }
 
 /* ------- Global cosmetic (前と同じ雰囲気) ------- */
@@ -116,6 +132,7 @@ interface LoanCalculationResult {
 interface HousingLoan {
     id: string;
     bank_name: string;
+    bank_type: string | null;
     min_annual_income_man_yen: number | null;
     max_loan_amount: number | null;
     interest_type: string | null;
@@ -1211,6 +1228,10 @@ export default function Home() {
         incomeInput != null && String(incomeInput).trim() !== "" &&
         ageInput != null && String(ageInput).trim() !== "";
 
+    // 表示する上位10件に対して、銀行種別ごとに A/B/C... のラベルを割り振る
+    const displayedLoans = filteredLoansWithCalculation.slice(0, 10);
+    const bankLabels = buildBankLabels(displayedLoans);
+
     return (
         <div className="min-h-screen gradient-hero bg-grid">
             <style>{GLOBAL_CSS}</style>
@@ -1373,7 +1394,7 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {filteredLoansWithCalculation.slice(0, 10).map((loan, index) => (
+                                    {displayedLoans.map((loan, index) => (
                                         <article
                                             key={loan.id}
                                             className="glass rounded-xl p-6"
@@ -1383,7 +1404,7 @@ export default function Home() {
                                                 {/* 銀行名と基本情報 */}
                                                 <div className="md:col-span-2">
                                                     <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                                                        {bankAlias(index)}
+                                                        {bankLabels.get(loan.id) ?? `銀行${index + 1}`}
                                                     </h3>
 
                                                     <div className="flex items-center gap-3 mb-3">
